@@ -110,13 +110,13 @@ namespace Psybot.Plugins
         /// <summary> Перейти в окно управления плагинами. Данный метод сам останавливает и воспроизводит логирование. </summary>
         public void EnterGUI()
         {
-            Term.Stop();
+            Term.Pause = true;
             Term.Flush();
 
             myPluginsControl();
 
             Console.Clear();
-            Term.Start();
+            Term.Pause = false;
             Term.ReDrawLog();
         }
 

@@ -29,6 +29,8 @@ namespace Psybot
         private const string CMD_EXIT       = "exit";
         private const string CMD_CLEAR      = "clear";
         private const string CMD_EXPAND     = "expand";
+        private const string CMD_PLUGINS    = "plugins";
+        private const string CMD_COMMANDS   = "commands";
         // todo: command list
 
         public PsybotCore()
@@ -48,7 +50,6 @@ namespace Psybot
         {
             Term.OnDraw += Term_OnDraw;
             client.MessageReceived += Client_MessageReceived;
-            pluginManager.EnterGUI(); // TEST
             addCommands();
             Term.Start();
 
@@ -167,11 +168,47 @@ namespace Psybot
                 Console.Clear();
                 Term.ReDrawLog();
             }, "Expadn console window.");
+            // ====================================================================== //
+            Term.AddCommand(CMD_PLUGINS, (s) =>
+            {
+                Term.Log(CMD_PLUGINS, ConsoleColor.White);
+                pluginManager.EnterGUI();
+            }, "Enter plugins manager.");
+            // ====================================================================== //
+            Term.AddCommand(CMD_COMMANDS, (s) =>
+            {
+                Term.Log(CMD_COMMANDS, ConsoleColor.White);
+                Term.ShowAllCommands();
+            }, "Show all commands.");
         }
 
         private void Log(object sender, LogMessageEventArgs e)
         {
-            Term.Log($"[{e.Severity}] {e.Source}: {e.Message}", ConsoleColor.Gray);
+            var clr = ConsoleColor.Gray;
+            switch (e.Severity)
+            {
+            case LogSeverity.Error:
+                clr = ConsoleColor.Red;
+                break;
+
+            case LogSeverity.Warning:
+                clr = ConsoleColor.Yellow;
+                break;
+
+            case LogSeverity.Info:
+                clr = ConsoleColor.White;
+                break;
+
+            case LogSeverity.Verbose:
+                //clr = ConsoleColor.Gray;
+                break;
+
+            case LogSeverity.Debug:
+                clr = ConsoleColor.DarkGray;
+                break;
+            }
+
+            Term.Log($"{e.Source}: {e.Message}", clr);
         }
 
         #region IPsybotCore

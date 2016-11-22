@@ -38,6 +38,8 @@ namespace Psybot.UI
 
         private static object writeLock = new object();
 
+        public static bool Pause = false;
+
         public static bool IsRunning => isRunning;
 
         // MET //
@@ -56,6 +58,7 @@ namespace Psybot.UI
         {
             lock (writeLock)
             {
+                Pause = true;
                 Console.Clear();
                 Console.SetCursorPosition(0, 0);
 
@@ -65,13 +68,20 @@ namespace Psybot.UI
                 foreach (var com in commands)
                 {
                     if (com.Value.Item2 != null && com.Value.Item2.Length > 0)
-                        Console.WriteLine($"  {com.Key}\t\t- {com.Value.Item2}");
+                    {
+                        Console.Write($"  {com.Key}");
+                        Console.CursorLeft = 20;
+                        Console.WriteLine($"- {com.Value.Item2}");
+                    }
                     else
+                    {
                         Console.WriteLine($"  {com.Key}");
+                    }
                 }
 
                 Console.ReadKey(true);
                 Console.Clear();
+                Pause = false;
                 ReDrawLog();
             }
         }
@@ -125,8 +135,12 @@ namespace Psybot.UI
                 while (isRunning)
                 {
                     Thread.Sleep(sleepTime);
+
                     if (sleepTime < 500)
                         sleepTime++;
+
+                    if (Pause)
+                        continue;
 
                     #region INPUT
 
