@@ -1,4 +1,4 @@
-﻿![psybot icon](art/psybot_logo.png)v0.1.0 βeta
+﻿![psybot icon](art/psybot_logo.png)v0.1.2 βeta
 * * *
 ## Psybot
 Bot for [Discord](https://discordapp.com), writing on C# with using [Discord.Net **v0.9.6**](https://github.com/RogueException/Discord.Net). It aims to cross-platform.
