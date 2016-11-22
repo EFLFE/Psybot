@@ -41,4 +41,6 @@ NuGet library:
 
 ## TODO
 
-- [ ] Custom terminal commands.
+- [ ] Custom terminal commands
+- [ ] PsybotPlugin Version on load dll
+- [ ] Minimize to tray for Winodws

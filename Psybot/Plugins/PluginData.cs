@@ -34,13 +34,20 @@ namespace Psybot.Plugins
 
         public StatusEnum Status = StatusEnum.Disable;
 
+        // имя файла без рашрирения
         public string FileName { get; private set; }
 
+        // полное имя файла
         public string FullFileName;
+
+        // полный путь к файлу
         public string FullPath;
 
         //public string Namespace;
         //public string MainClass;
+
+        /// <summary> Если плагин при работе выдал ошибку, то она будет записана в этом поле. </summary>
+        public Exception CrashException;
 
         public IPsybotPlugin Plugin;
 

@@ -66,18 +66,25 @@ namespace Psybot.Plugins
             if (pluginsDictData.ContainsKey(pluginName))
             {
                 var index = pluginsDictData[pluginName];
-                pluginsListData[index].Plugin?.Unload();
 
                 if (pluginsListData[index].Status == PluginData.StatusEnum.Enable)
                 {
                     enabledPlugins--;
                 }
+
+                // unload
+                pluginsListData[index].Plugin?.Unload();
                 pluginsListData[index].Status = PluginData.StatusEnum.Unloaded;
 
                 if (remove)
                 {
                     pluginsListData.RemoveAt(index);
-                    pluginsDictData.Remove(pluginName);
+                    // recheck index
+                    pluginsDictData.Clear();
+                    for (int i = 0; i < pluginsListData.Count; i++)
+                    {
+                        pluginsDictData.Add(pluginsListData[i].FileName, i);
+                    }
                 }
                 return true;
             }
@@ -109,7 +116,7 @@ namespace Psybot.Plugins
                         {
                             enabledPlugins--;
                             pluginsListData[i].Status = PluginData.StatusEnum.Crash;
-                            Term.Log(ex.Message, ConsoleColor.Red);
+                            pluginsListData[i].CrashException = ex;
                             Term.Log("Plugin crash: " + pluginsListData[i].FileName, ConsoleColor.Red);
                         }
                     }
@@ -143,7 +150,7 @@ namespace Psybot.Plugins
                 {
                     Term.Draw("[Arrow] - Navigation | [E] Enable | [D] Disable | [R] Remove", 0, Console.WindowHeight - 2);
                 }
-                Term.Draw("[B] Back | [F] Find new plugins", 0, Console.WindowHeight - 1);
+                Term.Draw("[I] Plug-in info     | [B] Back   | [F] Find new plugins", 0, Console.WindowHeight - 1);
 
                 if (pluginsListData.Count == 0)
                 {
@@ -162,7 +169,7 @@ namespace Psybot.Plugins
 
                 switch (k.Key)
                 {
-                case ConsoleKey.B:
+                case ConsoleKey.B: // back
                     return;
 
                 case ConsoleKey.UpArrow:
@@ -185,18 +192,21 @@ namespace Psybot.Plugins
                         selected++;
                     break;
 
-                case ConsoleKey.E:
+                case ConsoleKey.E: // enable
 
                     if (pluginsListData.Count == 0) break;
 
                     if (pluginsListData[selected].Status != PluginData.StatusEnum.Enable)
                     {
+                        if (pluginsListData[selected].Status == PluginData.StatusEnum.Disable)
+                        {
+                            enabledPlugins++;
+                        }
                         pluginsListData[selected].Status = PluginData.StatusEnum.Enable;
-                        enabledPlugins++;
                     }
                     break;
 
-                case ConsoleKey.D:
+                case ConsoleKey.D: // disable
 
                     if (pluginsListData.Count == 0) break;
 
@@ -207,24 +217,59 @@ namespace Psybot.Plugins
                     }
                     break;
 
-                case ConsoleKey.R:
+                case ConsoleKey.R: // remove
 
                     if (pluginsListData.Count == 0) break;
+                    var st = pluginsListData[selected].Status;
 
-                    if (UnloadPlugin(pluginsListData[selected].FileName, true) && selected == pluginsListData.Count)
+                    if (UnloadPlugin(pluginsListData[selected].FileName, true))
                     {
-                        selected--;
+                        if (selected == pluginsListData.Count)
+                            selected--;
+
                         Console.Clear();
                     }
                     break;
 
-                case ConsoleKey.F:
+                case ConsoleKey.I: // info
+
+                    if (pluginsListData.Count == 0) break;
+
+                    showPluginInfo(selected);
+
+                    break;
+
+                case ConsoleKey.F: // find
                     searchPluginsLibrary();
                     // reset
                     selected = 0;
                     break;
                 }
             }
+        }
+
+        private void showPluginInfo(int listIndex)
+        {
+            var plug = pluginsListData[listIndex];
+
+            Console.Clear();
+            Term.Draw("== Plugin info: " + plug.FileName, 0, 1, ConsoleColor.White);
+
+            Term.FastDraw("Full name: " + plug.FullFileName, 0, 3, ConsoleColor.Gray);
+            Term.FastDraw("\nFull path: " + plug.FullPath);
+            Term.FastDraw("\nAssembly type: " + plug.PluginAssemblyType.ToString());
+
+            // todo: Term.FastDraw("File version: ");
+            // todo description
+
+            if (plug.Status == PluginData.StatusEnum.Crash && plug.CrashException != null)
+            {
+                Term.FastDraw("\n\nCrash information:\n", ConsoleColor.Red);
+                Term.FastDraw(plug.CrashException.ToString(), ConsoleColor.Gray);
+            }
+
+            Term.ReadKey(true);
+            Console.Clear();
         }
 
         private void searchPluginsLibrary()
