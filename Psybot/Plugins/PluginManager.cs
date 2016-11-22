@@ -84,16 +84,25 @@ namespace Psybot.Plugins
             return false;
         }
 
+        // on user send message
         public async void ExcecutePlugins(PsybotPluginArgs args)
         {
+            // for plugins
             for (int i = 0; i < pluginsListData.Count; i++)
             {
+                // check status
                 if (pluginsListData[i].Status == PluginData.StatusEnum.Enable)
                 {
-                    if (args.Message.StartsWith(pluginsListData[i].Plugin.RunCommandName, StringComparison.Ordinal))
+                    // check command
+                    string cmd = pluginsListData[i].Plugin.RunCommandName;
+
+                    if (args.Message.StartsWith(cmd, pluginsListData[i].Plugin.CommandComparison))
                     {
                         try
                         {
+                            args.Message = args.Message.Remove(0, pluginsListData[i].Plugin.RunCommandName.Length)
+                                          .Trim(); // rm command
+
                             await pluginsListData[i].Plugin.Excecute(args);
                         }
                         catch (Exception ex)
@@ -144,7 +153,7 @@ namespace Psybot.Plugins
                 {
                     for (int i = 0; i < pluginsListData.Count; i++)
                     {
-                        drawPlugInfo(i + 1, i + 3, null, pluginsListData[i].FileName, pluginsListData[i].Status.ToString(), i == selected);
+                        drawPlugInfo(i + 1, i + 3, null, pluginsListData[i].FileName, pluginsListData[i].Status, i == selected);
                     }
                 }
 
@@ -308,7 +317,7 @@ namespace Psybot.Plugins
             Term.FastDraw("=== Loading " + path.Length + " plugins\n", ConsoleColor.White);
 
             // 0 - skip, 1 - reload, 2 - skip all, 3 - reload all
-            int containsType = 0;
+            int containsType = 0, loaded = 0, skips = 0, errors = 0;
 
             for (int i = 0; i < path.Length; i++)
             {
@@ -350,6 +359,7 @@ namespace Psybot.Plugins
                         case 0:
                         case 2:
                             // skip
+                            skips++;
                             Term.FastDraw("Skip\n", ConsoleColor.Gray);
                             continue;
 
@@ -387,6 +397,7 @@ namespace Psybot.Plugins
                     // wad found?
                     if (typeIndex == -1)
                     {
+                        errors++;
                         Term.FastDraw("Fail: Interface 'IPsybotPlugin' not found.\n", ConsoleColor.Red);
                         continue;
                     }
@@ -401,11 +412,13 @@ namespace Psybot.Plugins
                     // check
                     if (string.IsNullOrWhiteSpace(plug.RunCommandName))
                     {
+                        errors++;
                         Term.FastDraw("Error: 'RunCommandName' is not set.\n", ConsoleColor.Red);
                         continue;
                     }
                     if (plug.RunCommandName.Length > 18)
                     {
+                        errors++;
                         Term.FastDraw("Error: 'RunCommandName' text size should not be more than 18.\n", ConsoleColor.Red);
                         continue;
                     }
@@ -415,10 +428,12 @@ namespace Psybot.Plugins
                     pluginsDictData.Add(Path.GetFileNameWithoutExtension(path[i]), pluginsListData.Count - 1);
 
                     // success
+                    loaded++;
                     Term.FastDraw("Success\n", ConsoleColor.Green);
                 }
                 catch (Exception ex)
                 {
+                    errors++;
                     var exm = ex.Message;
                     if (exm.Length > Console.WindowWidth - 12)
                         exm = exm.Remove(Console.WindowWidth - 12) + "...";
@@ -427,12 +442,13 @@ namespace Psybot.Plugins
                 }
             }
 
-            Term.FastDraw("\nReady. Press any key ", ConsoleColor.Blue);
+            Term.FastDraw($"\nSummary:\n  Loaded: {loaded}\n  Errors: {errors}\n  Skips:  {skips}", ConsoleColor.Gray);
+            Term.FastDraw("\nPress any key ", ConsoleColor.White);
             Term.ReadKey(true);
             Console.Clear();
         }
 
-        private void drawPlugInfo(int num, int y, bool? flag, string title, string status = null, bool selected = false)
+        private void drawPlugInfo(int num, int y, bool? flag, string title, PluginData.StatusEnum? status = null, bool selected = false)
         {
             // > {num} │ [{(flag ? "x" : " ")}] │ {title} │ {status}
             var clr = selected ? ConsoleColor.White : ConsoleColor.DarkGray;
@@ -459,8 +475,29 @@ namespace Psybot.Plugins
 
             Term.FastDraw(title, clr);
 
-            if (status != null)
-                Term.FastDraw(" │ " + status + "   ", clr);
+            if (status.HasValue)
+            {
+                Term.FastDraw(" │ ", clr);
+
+                switch (status.Value)
+                {
+                case PluginData.StatusEnum.Disable:
+                    Term.FastDraw(status.ToString() + "   ", ConsoleColor.DarkGray);
+                    break;
+
+                case PluginData.StatusEnum.Enable:
+                    Term.FastDraw(status.ToString() + "   ", ConsoleColor.Green);
+                    break;
+
+                case PluginData.StatusEnum.Crash:
+                    Term.FastDraw(status.ToString() + "   ", ConsoleColor.Red);
+                    break;
+
+                case PluginData.StatusEnum.Unloaded:
+                    Term.FastDraw(status.ToString() + "   ", ConsoleColor.Gray);
+                    break;
+                }
+            }
         }
 
     }

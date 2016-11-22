@@ -210,6 +210,7 @@ namespace Psybot.UI
                                 OnCommandEnter?.Invoke(inputText, args);
                                 if (commands.ContainsKey(inputText))
                                 {
+                                    Log("> " + inputText, ConsoleColor.DarkGray);
                                     commands[inputText].Item1.Invoke(args);
                                 }
                                 else

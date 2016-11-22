@@ -11,6 +11,8 @@ namespace TestPlugin
 
         public ParameterTypeEnum ParameterType { get; set; }
 
+        public StringComparison CommandComparison { get; set; }
+
         private IPsybotCore core;
 
         public void Load(IPsybotCore _core)
@@ -18,6 +20,7 @@ namespace TestPlugin
             core = _core;
             RunCommandName = "-hi";
             ParameterType = ParameterTypeEnum.Unparsed;
+            CommandComparison = StringComparison.OrdinalIgnoreCase;
 
             Console.WriteLine("'Hello' load.");
         }

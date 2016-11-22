@@ -9,6 +9,8 @@ namespace PsybotPlugin
         /// <summary> Имя комманды для вызова. </summary>
         string RunCommandName { get; set; }
 
+        StringComparison CommandComparison { get; set; }
+
         ParameterTypeEnum ParameterType { get; set; }
 
         void Load(IPsybotCore _core);

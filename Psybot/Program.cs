@@ -6,13 +6,13 @@ namespace Psybot
 {
     public static class Program
     {
-        public const string VERSION = "0.1.1";
+        public const string VERSION = "0.1.2";
 
         // int.to https://msdn.microsoft.com/en-us/library/6t7dwaa5(v=vs.110).aspx
 
         public static void Main(string[] args)
         {
-            Console.Title = "Psybot";
+            Console.Title = "Psybot  v" + VERSION;
 
             try
             {

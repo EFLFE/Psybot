@@ -67,7 +67,8 @@ namespace Psybot
                 ChannelID = e.Channel.Id,
                 UserName = e.User.Name,
                 UserMention = e.User.Mention,
-                Message = e.Message.RawText
+                Message = e.Message.RawText,
+                RawMessage = e.Message.RawText
             });
         }
 
@@ -95,7 +96,6 @@ namespace Psybot
         {
             Term.AddCommand(CMD_CONNECT, async (s) =>
             {
-                Term.Log(CMD_CONNECT, ConsoleColor.White);
                 if (!File.Exists(TOKEN_FILE))
                 {
                     Term.Log("Token file '" + TOKEN_FILE + "' not found.", ConsoleColor.Red);
@@ -117,7 +117,6 @@ namespace Psybot
             // ====================================================================== //
             Term.AddCommand(CMD_DISCONNECT, async (s) =>
             {
-                Term.Log(CMD_DISCONNECT, ConsoleColor.White);
                 if (client == null)
                 {
                     Term.Log("DiscordClient is null.", ConsoleColor.Yellow);
@@ -129,7 +128,6 @@ namespace Psybot
             // ====================================================================== //
             //Term.AddCommand(CMD_SEND, async (s) =>
             //{
-            //    Term.Log(CMD_SEND, ConsoleColor.White);
             //    if (client == null)
             //    {
             //        Term.Log("DiscordClient is null.", ConsoleColor.Yellow);
@@ -140,20 +138,16 @@ namespace Psybot
             // ====================================================================== //
             Term.AddCommand(CMD_EXIT, (s) =>
             {
-                Term.Log(CMD_EXIT, ConsoleColor.White);
                 stop = true;
             }, "Close this program.");
             // ====================================================================== //
             Term.AddCommand(CMD_CLEAR, (s) =>
             {
-                Term.Log(CMD_CLEAR, ConsoleColor.White);
                 Console.Clear();
-                Term.Log("Clear console.");
             }, "Clear console.");
             // ====================================================================== //
             Term.AddCommand(CMD_EXPAND, (s) =>
             {
-                Term.Log(CMD_EXPAND, ConsoleColor.White);
                 try
                 {
                     Console.BufferWidth = 120;
@@ -171,17 +165,16 @@ namespace Psybot
             // ====================================================================== //
             Term.AddCommand(CMD_PLUGINS, (s) =>
             {
-                Term.Log(CMD_PLUGINS, ConsoleColor.White);
                 pluginManager.EnterGUI();
             }, "Enter plugins manager.");
             // ====================================================================== //
             Term.AddCommand(CMD_COMMANDS, (s) =>
             {
-                Term.Log(CMD_COMMANDS, ConsoleColor.White);
                 Term.ShowAllCommands();
             }, "Show all commands.");
         }
 
+        // Discord.Net client log
         private void Log(object sender, LogMessageEventArgs e)
         {
             var clr = ConsoleColor.Gray;
