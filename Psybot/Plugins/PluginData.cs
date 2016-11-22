@@ -16,7 +16,10 @@ namespace Psybot.Plugins
             Enable,
 
             /// <summary> Ошибка при работе. </summary>
-            Crash
+            Crash,
+
+            /// <summary> Выгружен. </summary>
+            Unloaded
         }
 
         public enum PluginAssemblyTypeEnum

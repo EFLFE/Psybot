@@ -68,9 +68,6 @@ namespace Psybot
                 UserMention = e.User.Mention,
                 Message = e.Message.RawText
             });
-
-            //if (e.User.Id == ID_EFLFE)
-            //    e.Channel.SendMessage(e.User.Mention + " send some text?");
         }
 
         private void Term_OnDraw()
@@ -87,7 +84,7 @@ namespace Psybot
                 tx += "Status: Disconected";
             }
 
-            tx += " | MEM: " + (GC.GetTotalMemory(false) / 100000L) + " mb";
+            tx += $" | MEM: {(GC.GetTotalMemory(false) / 100000L)} mb | Plug-in: {pluginManager.GetEnabledPlugins}/{pluginManager.GetInstalledPlugins}";
 
             Term.Draw(tx, 0, 0);
         }

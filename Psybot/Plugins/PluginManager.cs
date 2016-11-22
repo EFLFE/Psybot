@@ -30,6 +30,11 @@ namespace Psybot.Plugins
         private IniReader iniReader;
         private List<PluginData> pluginsListData;
         private Dictionary<string, int> pluginsDictData; // поиск индекса плагина в листе по имени
+        private int enabledPlugins;
+
+        public int GetInstalledPlugins => pluginsListData.Count;
+
+        public int GetEnabledPlugins => enabledPlugins;
 
         public PluginManager(IPsybotCore ipsycore)
         {
@@ -61,6 +66,13 @@ namespace Psybot.Plugins
             {
                 var index = pluginsDictData[pluginName];
                 pluginsListData[index].Plugin?.Unload();
+
+                if (pluginsListData[index].Status == PluginData.StatusEnum.Enable)
+                {
+                    enabledPlugins--;
+                }
+                pluginsListData[index].Status = PluginData.StatusEnum.Unloaded;
+
                 if (remove)
                 {
                     pluginsListData.RemoveAt(index);
@@ -85,6 +97,7 @@ namespace Psybot.Plugins
                         }
                         catch (Exception ex)
                         {
+                            enabledPlugins--;
                             pluginsListData[i].Status = PluginData.StatusEnum.Crash;
                             Term.Log(ex.Message, ConsoleColor.Red);
                             Term.Log("Plugin crash: " + pluginsListData[i].FileName, ConsoleColor.Red);
@@ -164,14 +177,24 @@ namespace Psybot.Plugins
 
                 case ConsoleKey.E:
 
-                    pluginsListData[selected].Status = PluginData.StatusEnum.Enable;
+                    if (pluginsListData.Count == 0) break;
+
+                    if (pluginsListData[selected].Status != PluginData.StatusEnum.Enable)
+                    {
+                        pluginsListData[selected].Status = PluginData.StatusEnum.Enable;
+                        enabledPlugins++;
+                    }
                     break;
 
                 case ConsoleKey.D:
 
                     if (pluginsListData.Count == 0) break;
 
-                    pluginsListData[selected].Status = PluginData.StatusEnum.Disable;
+                    if (pluginsListData[selected].Status != PluginData.StatusEnum.Disable)
+                    {
+                        pluginsListData[selected].Status = PluginData.StatusEnum.Disable;
+                        enabledPlugins--;
+                    }
                     break;
 
                 case ConsoleKey.R:
