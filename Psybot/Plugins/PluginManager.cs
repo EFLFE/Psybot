@@ -253,7 +253,7 @@ namespace Psybot.Plugins
             var plug = pluginsListData[listIndex];
 
             Console.Clear();
-            Term.Draw("== Plugin info: " + plug.FileName, 0, 1, ConsoleColor.White);
+            Term.FastDraw("== Plugin info: " + plug.FileName, 0, 1, ConsoleColor.White);
 
             Term.FastDraw("Full name: " + plug.FullFileName, 0, 3, ConsoleColor.Gray);
             Term.FastDraw("\nFull path: " + plug.FullPath);
