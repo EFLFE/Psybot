@@ -368,7 +368,8 @@ namespace Psybot.UI
             logList.Insert(0, new Tuple<string, ConsoleColor, string>(message, color, DateTime.Now.ToString("HH:mm:ss")));
             logListCount++;
 
-            ReDrawLog();
+            if (!Pause)
+                ReDrawLog();
 
             if (logList.Count > LOG_LIST_CAPACITY)
             {

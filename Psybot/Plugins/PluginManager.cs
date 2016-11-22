@@ -25,6 +25,7 @@ namespace Psybot.Plugins
         private const string INI_PLUGIN_SECTION_TITLE     = "title";
         private const string INI_PLUGIN_SECTION_DESC      = "desc";
         */
+
         private IPsybotCore core;
         //private PluginCompiler compiler;
         private IniReader iniReader;
@@ -202,7 +203,10 @@ namespace Psybot.Plugins
                     if (pluginsListData.Count == 0) break;
 
                     if (UnloadPlugin(pluginsListData[selected].FileName, true) && selected == pluginsListData.Count)
+                    {
                         selected--;
+                        Console.Clear();
+                    }
                     break;
 
                 case ConsoleKey.F:

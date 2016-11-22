@@ -38,3 +38,7 @@ NuGet library:
 - Nito.Deque
 - RestSharp
 - WebSocket4Net
+
+## TODO
+
+- [ ] Custom terminal commands.

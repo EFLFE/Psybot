@@ -31,7 +31,7 @@ namespace TestPlugin
         {
             await Task.Run(() =>
             {
-                core.SendMessage(e.ChannelID, "Hello, " + e.UserMention + "!");
+                core.SendMessage(e.ChannelID, "Hello, " + e.UserMention);
             });
         }
     }
