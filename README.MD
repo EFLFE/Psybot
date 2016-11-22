@@ -31,7 +31,6 @@ Psybot writing on C# 6 / .NET 4.5 / Visual Studio 2015
 NuGet library:
 - Discord.Net
 - Antlr
-- ExpressionEvaluator
 - HtmlAgilityPack
 - Newtonsoft.Json
 - Nito.AsyncEx
@@ -44,3 +43,5 @@ NuGet library:
 - [ ] Custom terminal commands
 - [ ] PsybotPlugin Version on load dll
 - [ ] Minimize to tray for Winodws
+- [ ] Get decriptrion for command from channel
+- [ ] Plugin for administration management
