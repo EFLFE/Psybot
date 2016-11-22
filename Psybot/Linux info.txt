@@ -1,0 +1,8 @@
+﻿To use Discord.Net 1.0 on Linux you must:
+
+1. Add https://dotnet.myget.org/F/dotnet-core/api/v3/index.json to your project's NuGet.config
+2. Add "System.Net.WebSockets.Client": "4.0.1-*" to your project.json's dependencies
+3. Run dotnet restore
+4. Use Discord.Net normally
+
+https://github.com/Kwoth/NadekoBot/blob/master/docs/guides/Linux%20Guide.md
