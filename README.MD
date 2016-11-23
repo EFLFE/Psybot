@@ -15,7 +15,9 @@ Instructions in the Wiki.
 Download the latest binary version of the Psybot, extract, and run **Psybot.exe**.
 
 **For Linux:**
-You have to download the source code and compile **.sin** project, using **xbuild**.
+~~You have to download the source code and compile **.sin** project, using **xbuild**.~~
+
+Coming soon.
 
 **Token:**
 You must have to create a **token.txt** file in the program folder and put the Token key.
