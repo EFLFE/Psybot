@@ -395,7 +395,7 @@ namespace Psybot.UI
         /// <param name="y"> Позиция Y. </param>
         public static void ClearLine(int y)
         {
-            Draw(new string(' ', Console.BufferWidth - 1), 0, y, ConsoleColor.Gray);
+            Draw(new string(' ', Console.BufferWidth), 0, y, ConsoleColor.Gray);
         }
 
         /// <summary> Ожидать нажатия клавиши, включив мигание курсора. </summary>
