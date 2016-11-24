@@ -103,12 +103,11 @@ namespace Psybot.Plugins
                     // check command
                     string cmd = pluginsListData[i].Plugin.RunCommandName;
 
-                    if (args.Message.StartsWith(cmd, pluginsListData[i].Plugin.CommandComparison))
+                    if (args.Message.RawText.StartsWith(cmd, pluginsListData[i].Plugin.CommandComparison))
                     {
                         try
                         {
-                            args.Message = args.Message.Remove(0, pluginsListData[i].Plugin.RunCommandName.Length)
-                                          .Trim(); // rm command
+                            args.Message.Text = args.Message.RawText.Remove(0, pluginsListData[i].Plugin.RunCommandName.Length).Trim(); // rm command
 
                             await pluginsListData[i].Plugin.Excecute(args);
                         }
@@ -274,6 +273,7 @@ namespace Psybot.Plugins
 
         private void searchPluginsLibrary()
         {
+            // get library in default folder
             string[] libs = Directory.GetFiles(DEFAULT_PLUGIN_PATH, "*.dll");
 
             if (libs.Length == 0)
@@ -293,9 +293,14 @@ namespace Psybot.Plugins
             bool[] flags = new bool[libs.Length];
             string[] names = new string[libs.Length];
 
+            // get full info
             for (int i = 0; i < libs.Length; i++)
             {
-                names[i] = Path.GetFileNameWithoutExtension(libs[i]);
+                var ver = System.Diagnostics.FileVersionInfo.GetVersionInfo(libs[i]);
+                var fileName = string.IsNullOrWhiteSpace(ver.ProductName) ? Path.GetFileName(libs[i]) : ver.ProductName;
+                var fileVersion = string.IsNullOrWhiteSpace(ver.FileVersion) ? "?" : ver.FileVersion;
+
+                names[i] = $"{fileName}  v{fileVersion}";
                 libs[i] = Path.GetFullPath(libs[i]);
             }
 

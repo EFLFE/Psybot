@@ -4,6 +4,9 @@ namespace PsybotPlugin
 {
     public static class Config
     {
-        public const string VERSION = "0.1.1";
+        /// <summary>
+        ///     The version of PsybotPlugin library.
+        /// </summary>
+        public const string VERSION = "0.1.2";
     }
 }

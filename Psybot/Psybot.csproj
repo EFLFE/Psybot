@@ -109,6 +109,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Data\IniReader.cs" />
+    <Compile Include="EXConverter.cs" />
     <Compile Include="Plugins\PluginCompiler.cs" />
     <Compile Include="Plugins\PluginData.cs" />
     <Compile Include="Plugins\PluginManager.cs" />

@@ -1,4 +1,11 @@
-﻿![psybot icon](art/psybot_logo.png)v0.1.2 βeta
+﻿![psybot icon](art/psybot_logo.png)
+
+## Release info
+
+Last release version: **0.1.4 βeta** _(24.11.16)_
+
+Last PsybotPlugin version: **0.1.2** _(24.11.16)_
+
 * * *
 ## Psybot
 Bot for [Discord](https://discordapp.com), writing on C# with using [Discord.Net **v0.9.6**](https://github.com/RogueException/Discord.Net). It aims to cross-platform.
@@ -20,7 +27,7 @@ Download the latest binary version of the Psybot, extract, and run **Psybot.exe*
 Coming soon.
 
 **Token:**
-You must have to create a **token.txt** file in the program folder and put the Token key.
+You must have to create a **token.txt** file in the program folder and put the Token key for bot.
 
 ## Installation plugins
 

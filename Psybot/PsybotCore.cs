@@ -12,9 +12,12 @@ namespace Psybot
     {
         private const string TOKEN_FILE = "token.txt";
 
-        #region IPsybotCore
+        #region IPsybotCore VARS
 
-        public bool Connected { get; private set; }
+        /// <summary>
+        ///     Get connected status.
+        /// </summary>
+        public bool Connected => client == null ? false : client.State == ConnectionState.Connected;
 
         #endregion
 
@@ -31,7 +34,6 @@ namespace Psybot
         private const string CMD_EXPAND     = "expand";
         private const string CMD_PLUGINS    = "plugins";
         private const string CMD_COMMANDS   = "commands";
-        // todo: command list
 
         public PsybotCore()
         {
@@ -50,6 +52,7 @@ namespace Psybot
         {
             Term.OnDraw += Term_OnDraw;
             client.MessageReceived += Client_MessageReceived;
+
             addCommands();
             Term.Start();
 
@@ -62,33 +65,47 @@ namespace Psybot
         // любое сообщение на сервере
         private void Client_MessageReceived(object sender, MessageEventArgs e)
         {
-            pluginManager.ExcecutePlugins(new PsybotPluginArgs()
+            pluginManager.ExcecutePlugins(new PsybotPluginArgs
             {
-                ChannelID = e.Channel.Id,
-                UserName = e.User.Name,
-                UserMention = e.User.Mention,
-                Message = e.Message.RawText,
-                RawMessage = e.Message.RawText
+                Channel = e.Channel.ChannelForPlugin(),
+                Message = e.Message.MessageForPlugin(),
+                Server = e.Server.ServerForPlugin(),
+                User = e.User.UserForPlugin()
             });
         }
 
         private void Term_OnDraw()
         {
             Term.ClearLine(0);
-            string tx = string.Empty;
 
-            if (Connected)
+            Term.Draw("State:", 0, 0, ConsoleColor.Gray);
+
+            switch (client.State)
             {
-                tx += "Status: Connected";
-            }
-            else
-            {
-                tx += "Status: Disconected";
+            case ConnectionState.Disconnected:
+                Term.Draw("Disconnected", 7, 0, ConsoleColor.Red);
+                break;
+
+            case ConnectionState.Connecting:
+                Term.Draw("Connecting", 7, 0, ConsoleColor.Yellow);
+                break;
+
+            case ConnectionState.Connected:
+                Term.Draw("Connected", 7, 0, ConsoleColor.Green);
+                break;
+
+            case ConnectionState.Disconnecting:
+                Term.Draw("Disconnecting", 7, 0, ConsoleColor.Yellow);
+                break;
+
+            default:
+                Term.Draw(client.State.ToString(), 7, 0, ConsoleColor.Gray);
+                break;
             }
 
-            tx += $" | MEM: {(GC.GetTotalMemory(false) / 100000L)} mb | Plug-in: {pluginManager.GetEnabledPlugins}/{pluginManager.GetInstalledPlugins}";
-
-            Term.Draw(tx, 0, 0);
+            Term.Draw(
+                $" | MEM: {(GC.GetTotalMemory(false) / 100000L)} mb | Plug-in: {pluginManager.GetEnabledPlugins}/{pluginManager.GetInstalledPlugins}",
+                20, 0, ConsoleColor.Gray);
         }
 
         // console commands
@@ -106,7 +123,6 @@ namespace Psybot
                 {
                     var tocken = File.ReadAllText(TOKEN_FILE);
                     await client.Connect(tocken, TokenType.Bot);
-                    Connected = true;
                 }
                 catch (Exception ex)
                 {
@@ -122,7 +138,6 @@ namespace Psybot
                     Term.Log("DiscordClient is null.", ConsoleColor.Yellow);
                     return;
                 }
-                Connected = false;
                 await client.Disconnect();
             }, "Disonnect from server.");
             // ====================================================================== //
@@ -138,6 +153,10 @@ namespace Psybot
             // ====================================================================== //
             Term.AddCommand(CMD_EXIT, (s) =>
             {
+                if (Connected)
+                {
+                    client.Disconnect();
+                }
                 stop = true;
             }, "Close this program.");
             // ====================================================================== //
@@ -204,13 +223,27 @@ namespace Psybot
             Term.Log($"{e.Source}: {e.Message}", clr);
         }
 
-        #region IPsybotCore
+        #region IPsybotCore METHODS
 
+        /// <summary> Send a message to the server. </summary>
+        /// <param name="channelID"> Channel ID. </param>
+        /// <param name="message"> Message. </param>
         public async void SendMessage(ulong channelID, string message)
         {
             if (!Connected)
                 return;
             await client.GetChannel(channelID)?.SendMessage(message);
+        }
+
+        /// <summary>
+        ///     Write a text to server log.
+        /// </summary>
+        /// <param name="mess"> Text. </param>
+        /// <param name="color"> Text color. </param>
+        public void SendLog(string mess, ConsoleColor color)
+        {
+            // todo: auto detect owner plugin name
+            Term.Log("$ " + mess, color);
         }
 
         #endregion

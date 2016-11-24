@@ -6,7 +6,6 @@ namespace TestPlugin
 {
     public sealed class Hello : IPsybotPlugin
     {
-        /// <summary> Имя комманды для вызова. </summary>
         public string RunCommandName { get; set; }
 
         public ParameterTypeEnum ParameterType { get; set; }
@@ -34,7 +33,7 @@ namespace TestPlugin
         {
             await Task.Run(() =>
             {
-                core.SendMessage(e.ChannelID, "Hello, " + e.UserMention);
+                core.SendMessage(e.Channel.Id, "Hello, " + e.User.Mention);
             });
         }
     }
