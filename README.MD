@@ -1,5 +1,9 @@
 ﻿![psybot icon](art/psybot_logo.png)
 
+# WARNING
+
+Проект был эксперементальным и вскоре будет удалён.
+
 ## Release info
 
 Last release version: **0.1.4 βeta** _(24.11.16)_
