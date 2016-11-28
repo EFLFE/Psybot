@@ -1,9 +1,5 @@
 ﻿![psybot icon](art/psybot_logo.png)
 
-# WARNING
-
-Проект был эксперементальным и вскоре будет удалён.
-
 ## Release info
 
 Last release version: **0.1.4 βeta** _(24.11.16)_
@@ -19,6 +15,10 @@ The main feature is a dynamic functional expandability using libraries.
 You can write library using **PsybotPlugin** and get a plug-in, which can be loaded intro Psybot program witchout restarting and reassembly. Or you can find exists plug-in (in future).
 
 Instructions in the Wiki.
+
+# Warning
+
+This is experimental version. I'm plan to completely rewrite the code for [Discord.Net](https://discordapp.com) **v1.0**.
 
 ## Installation
 

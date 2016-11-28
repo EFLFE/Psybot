@@ -196,7 +196,7 @@ namespace Psybot.UI
                         else
                         {
                             skip = 0;
-                            if (k.Key == ConsoleKey.Enter && inputText.Length > 0)
+                            if (k.Key == ConsoleKey.Enter && inputText.Split().Length > 0)
                             {
                                 // ENTER
                                 string args = null;
@@ -208,14 +208,15 @@ namespace Psybot.UI
                                 }
 
                                 OnCommandEnter?.Invoke(inputText, args);
+
                                 if (commands.ContainsKey(inputText))
                                 {
-                                    Log("> " + inputText, ConsoleColor.DarkGray);
+                                    Log("> " + inputText, ConsoleColor.Gray);
                                     commands[inputText].Item1.Invoke(args);
                                 }
                                 else
                                 {
-                                    Log($"Unknown command \'{inputText}\'", ConsoleColor.DarkYellow);
+                                    Log($"Unknown command \'{inputText}\'", ConsoleColor.Gray);
                                 }
 
                                 //Draw(inputText, 1, Console.WindowHeight - 1, ConsoleColor.Black); // clear

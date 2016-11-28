@@ -28,7 +28,7 @@ namespace Psybot
         // console commands:
         private const string CMD_CONNECT    = "connect";
         private const string CMD_DISCONNECT = "disconnect";
-        private const string CMD_SEND       = "send";
+        //private const string CMD_SEND       = "send";
         private const string CMD_EXIT       = "exit";
         private const string CMD_CLEAR      = "clear";
         private const string CMD_EXPAND     = "expand";
@@ -40,7 +40,11 @@ namespace Psybot
             client = new DiscordClient(x =>
             {
                 x.AppName = "Psybot";
+#if DEBUG
                 x.LogLevel = LogSeverity.Debug;
+#else
+                x.LogLevel = LogSeverity.Info;
+#endif
                 x.LogHandler = Log;
                 //x.AppUrl = "???";
             });
@@ -104,7 +108,7 @@ namespace Psybot
             }
 
             Term.Draw(
-                $" | MEM: {(GC.GetTotalMemory(false) / 100000L)} mb | Plug-in: {pluginManager.GetEnabledPlugins}/{pluginManager.GetInstalledPlugins}",
+                $" | MEM: {(GC.GetTotalMemory(false) / (1024L * 1024L))} mb | Plug-in: {pluginManager.GetEnabledPlugins}/{pluginManager.GetInstalledPlugins}",
                 20, 0, ConsoleColor.Gray);
         }
 
@@ -216,7 +220,7 @@ namespace Psybot
                 break;
 
             case LogSeverity.Debug:
-                clr = ConsoleColor.DarkGray;
+                clr = ConsoleColor.Gray;
                 break;
             }
 

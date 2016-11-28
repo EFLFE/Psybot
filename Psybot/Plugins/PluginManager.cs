@@ -153,7 +153,7 @@ namespace Psybot.Plugins
 
                 if (pluginsListData.Count == 0)
                 {
-                    Term.Draw("(empty)", 0, 3, ConsoleColor.DarkGray);
+                    Term.Draw("(empty)", 0, 3, ConsoleColor.Gray);
                 }
                 else
                 {
@@ -501,7 +501,7 @@ namespace Psybot.Plugins
         private void drawPlugInfo(int num, int y, bool? flag, string title, PluginData.StatusEnum? status = null, bool selected = false)
         {
             // > {num} │ [{(flag ? "x" : " ")}] │ {title} │ {status}
-            var clr = selected ? ConsoleColor.White : ConsoleColor.DarkGray;
+            var clr = selected ? ConsoleColor.White : ConsoleColor.Gray;
 
             if (selected)
             {
@@ -515,9 +515,9 @@ namespace Psybot.Plugins
             else
             {
                 if (flag.HasValue)
-                    Term.FastDraw($"> {num} │ [{(flag.Value ? "x" : " ")}] │ ", 0, y, ConsoleColor.DarkGray);
+                    Term.FastDraw($"> {num} │ [{(flag.Value ? "x" : " ")}] │ ", 0, y, ConsoleColor.Gray);
                 else
-                    Term.FastDraw($"> {num} │ ", 0, y, ConsoleColor.DarkGray);
+                    Term.FastDraw($"> {num} │ ", 0, y, ConsoleColor.Gray);
             }
 
             if (title.Length > 48)
@@ -532,7 +532,7 @@ namespace Psybot.Plugins
                 switch (status.Value)
                 {
                 case PluginData.StatusEnum.Disable:
-                    Term.FastDraw(status.ToString() + "   ", ConsoleColor.DarkGray);
+                    Term.FastDraw(status.ToString() + "   ", ConsoleColor.Gray);
                     break;
 
                 case PluginData.StatusEnum.Enable:
