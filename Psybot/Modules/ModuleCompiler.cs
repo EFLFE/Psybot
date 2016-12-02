@@ -2,18 +2,18 @@
 using System.CodeDom.Compiler;
 using System.IO;
 using Microsoft.CSharp;
-using PsybotPlugin;
+using PsybotModule;
 
-namespace Psybot.Plugins
+namespace Psybot.Modules
 {
     // for source code
     [Obsolete("Not ready.", true)]
-    internal sealed class PluginCompiler
+    internal sealed class ModuleCompiler
     {
         private CSharpCodeProvider codeProvider = null;
         private CompilerParameters parameters = null;
 
-        public PluginCompiler()
+        public ModuleCompiler()
         {
             codeProvider = new CSharpCodeProvider();
             parameters = new CompilerParameters
@@ -41,11 +41,11 @@ namespace Psybot.Plugins
 
             parameters.ReferencedAssemblies.Add("System.dll");
             parameters.ReferencedAssemblies.Add("System.Core.dll");
-            parameters.ReferencedAssemblies.Add("PsybotPlugin.dll");
+            parameters.ReferencedAssemblies.Add("PsybotModule.dll");
         }
 
         [Obsolete("TERM XY?", true)]
-        public IPsybotPlugin CompileSourceFiles(string[] files)
+        public IPsybotModule CompileSourceFiles(string[] files)
         {
             // BUILD
             Console.WriteLine("Compiling...");
@@ -88,13 +88,13 @@ namespace Psybot.Plugins
 
             Console.WriteLine("Source built successfully!");
 
-            var type = result.CompiledAssembly.GetType("TestPlugin.Baka");
-            IPsybotPlugin typePlug = (IPsybotPlugin)Activator.CreateInstance(type);
-            //typePlug.Load();
+            var type = result.CompiledAssembly.GetType("TestModule.Baka");
+            IPsybotModule typeModule = (IPsybotModule)Activator.CreateInstance(type);
+            //typeModule.Load();
 
             Console.WriteLine("Create instance successfully!");
 
-            return typePlug;
+            return typeModule;
         }
 
         public void CompileCSPROJ()

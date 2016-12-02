@@ -6,7 +6,7 @@ namespace Psybot
 {
     public static class Program
     {
-        public const string VERSION = "0.1.4";
+        public const string VERSION = "0.2.0";
 
         public static void Main(string[] args)
         {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace PsybotPlugin
+namespace PsybotModule
 {
     /// <summary>
     ///     Base interface for Plug-in's.

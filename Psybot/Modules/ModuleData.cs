@@ -1,10 +1,10 @@
 ﻿using System;
 using System.IO;
-using PsybotPlugin;
+using PsybotModule;
 
-namespace Psybot.Plugins
+namespace Psybot.Modules
 {
-    internal sealed class PluginData
+    internal sealed class ModuleData
     {
         /// <summary> Состояние. </summary>
         public enum StatusEnum
@@ -22,7 +22,7 @@ namespace Psybot.Plugins
             Unloaded
         }
 
-        public enum PluginAssemblyTypeEnum
+        public enum ModuleAssemblyTypeEnum
         {
             NotLoaded,
             Source,
@@ -30,7 +30,7 @@ namespace Psybot.Plugins
             Library
         }
 
-        public PluginAssemblyTypeEnum PluginAssemblyType = PluginAssemblyTypeEnum.NotLoaded;
+        public ModuleAssemblyTypeEnum ModuleAssemblyType = ModuleAssemblyTypeEnum.NotLoaded;
 
         public StatusEnum Status = StatusEnum.Disable;
 
@@ -49,18 +49,18 @@ namespace Psybot.Plugins
         /// <summary> Если плагин при работе выдал ошибку, то она будет записана в этом поле. </summary>
         public Exception CrashException;
 
-        public IPsybotPlugin Plugin;
+        public IPsybotModule Module;
 
-        public PluginData(string fullPath, IPsybotPlugin plugin)
+        public ModuleData(string fullPath, IPsybotModule module)
         {
-            Plugin = plugin;
+            Module = module;
             FullPath = fullPath;
             FileName = Path.GetFileNameWithoutExtension(fullPath);
             FullFileName = Path.GetFileName(fullPath);
 
             if (fullPath.EndsWith(".dll"))
             {
-                PluginAssemblyType = PluginAssemblyTypeEnum.Library;
+                ModuleAssemblyType = ModuleAssemblyTypeEnum.Library;
                 //Status = StatusEnum.Disable;
             }
         }

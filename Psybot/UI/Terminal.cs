@@ -326,23 +326,27 @@ namespace Psybot.UI
 
         public static void FastDraw(string text)
         {
+            if (!Pause) return;
             Console.Write(text);
         }
 
         public static void FastDraw(string text, int x, int y)
         {
+            if (!Pause) return;
             Console.SetCursorPosition(x, y);
             Console.Write(text);
         }
 
         public static void FastDraw(string text, ConsoleColor fcolor)
         {
+            if (!Pause) return;
             Console.ForegroundColor = fcolor;
             Console.Write(text);
         }
 
         public static void FastDraw(string text, int x, int y, ConsoleColor fcolor)
         {
+            if (!Pause) return;
             Console.ForegroundColor = fcolor;
             Console.SetCursorPosition(x, y);
             Console.Write(text);
@@ -350,6 +354,7 @@ namespace Psybot.UI
 
         public static void FastDraw(string text, ConsoleColor fcolor, ConsoleColor bcolor)
         {
+            if (!Pause) return;
             Console.ForegroundColor = fcolor;
             Console.BackgroundColor = bcolor;
             Console.Write(text);
@@ -357,6 +362,7 @@ namespace Psybot.UI
 
         public static void FastDraw(string text, int x, int y, ConsoleColor fcolor, ConsoleColor bcolor)
         {
+            if (!Pause) return;
             Console.ForegroundColor = fcolor;
             Console.BackgroundColor = bcolor;
             Console.SetCursorPosition(x, y);

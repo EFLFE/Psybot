@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace PsybotPlugin.MessageEventData
+namespace PsybotModule.MessageEventData
 {
     public struct Message
     {

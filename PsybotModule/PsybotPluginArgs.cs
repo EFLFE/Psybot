@@ -1,9 +1,9 @@
-﻿using PsybotPlugin.MessageEventData;
+﻿using PsybotModule.MessageEventData;
 
-namespace PsybotPlugin
+namespace PsybotModule
 {
-    /// <summary> Аргументы отправителя сообщения и других данных. </summary>
-    public sealed class PsybotPluginArgs
+    /// <summary> Server args. </summary>
+    public sealed class PsybotModuleArgs
     {
         /*
         /// <summary> Сообщение без аргумента. </summary>

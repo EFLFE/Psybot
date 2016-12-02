@@ -3,38 +3,38 @@
     public static class EXConverter
     {
         /// <summary>
-        ///     Get fields from Discord.Channel to PsybotPlugin.MessageEventData.Channel
+        ///     Get fields from Discord.Channel to PsybotModule.MessageEventData.Channel
         /// </summary>
-        public static PsybotPlugin.MessageEventData.Channel ChannelForPlugin(this Discord.Channel c)
+        public static PsybotModule.MessageEventData.Channel ChannelForModule(this Discord.Channel c)
         {
-            return new PsybotPlugin.MessageEventData.Channel(
+            return new PsybotModule.MessageEventData.Channel(
                 c.Id, c.IsPrivate, c.Mention, c.Name, c.Position, c.Topic);
         }
 
         /// <summary>
-        ///     Get fields from Discord.Message to PsybotPlugin.MessageEventData.Message
+        ///     Get fields from Discord.Message to PsybotModule.MessageEventData.Message
         /// </summary>
-        public static PsybotPlugin.MessageEventData.Message MessageForPlugin(this Discord.Message m)
+        public static PsybotModule.MessageEventData.Message MessageForModule(this Discord.Message m)
         {
-            return new PsybotPlugin.MessageEventData.Message(
-                m.Channel.ChannelForPlugin(), m.Id, m.IsAuthor, m.IsTTS, m.RawText, m.Server.ServerForPlugin(), m.Text, m.Timestamp, m.User.UserForPlugin());
+            return new PsybotModule.MessageEventData.Message(
+                m.Channel.ChannelForModule(), m.Id, m.IsAuthor, m.IsTTS, m.RawText, m.Server.ServerForModule(), m.Text, m.Timestamp, m.User.UserForModule());
         }
 
         /// <summary>
-        ///     Get fields from Discord.Server to PsybotPlugin.MessageEventData.Server
+        ///     Get fields from Discord.Server to PsybotModule.MessageEventData.Server
         /// </summary>
-        public static PsybotPlugin.MessageEventData.Server ServerForPlugin(this Discord.Server s)
+        public static PsybotModule.MessageEventData.Server ServerForModule(this Discord.Server s)
         {
-            return new PsybotPlugin.MessageEventData.Server(
+            return new PsybotModule.MessageEventData.Server(
                 s.ChannelCount, s.IconId, s.IconUrl, s.Id, s.IsOwner, s.Name, s.SplashId, s.SplashUrl);
         }
 
         /// <summary>
-        ///     Get fields from Discord.User to PsybotPlugin.MessageEventData.User
+        ///     Get fields from Discord.User to PsybotModule.MessageEventData.User
         /// </summary>
-        public static PsybotPlugin.MessageEventData.User UserForPlugin(this Discord.User u)
+        public static PsybotModule.MessageEventData.User UserForModule(this Discord.User u)
         {
-            return new PsybotPlugin.MessageEventData.User(
+            return new PsybotModule.MessageEventData.User(
                 u.AvatarId, u.AvatarUrl, u.Id, u.IsBot, u.IsSelfDeafened, u.IsSelfMuted, u.IsServerDeafened, u.IsServerMuted, u.IsServerSuppressed, u.JoinedAt, u.Mention, u.Name, u.Nickname, u.NicknameMention);
         }
     }

@@ -16,7 +16,7 @@
     <DebugSymbols>false</DebugSymbols>
     <DebugType>none</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\Psybot\bin\Debug\Plugins\</OutputPath>
+    <OutputPath>..\Psybot\bin\Debug\Modules\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -25,7 +25,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>none</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\Psybot\bin\Release\Plugins\</OutputPath>
+    <OutputPath>..\Psybot\bin\Release\Modules\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -47,7 +47,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\PsybotPlugin\PsybotPlugin.csproj">
+    <ProjectReference Include="..\PsybotModule\PsybotModule.csproj">
       <Project>{bff7c86a-c9b3-4584-a047-0e110f650a80}</Project>
       <Name>PsybotPlugin</Name>
       <Private>False</Private>

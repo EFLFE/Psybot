@@ -1,16 +1,15 @@
 ﻿using System.Reflection;
 using System.Runtime.InteropServices;
-using PsybotPlugin;
 
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("PsybotPlugin")]
-[assembly: AssemblyDescription("PsybotPlugin for Psybot")]
+[assembly: AssemblyTitle("TestPlugin")]
+[assembly: AssemblyDescription("TestPlugin 'Hello' for Psybot")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("PsybotPlugin")]
-[assembly: AssemblyCopyright("© EFLFE 2016")]
+[assembly: AssemblyProduct("TestPlugin")]
+[assembly: AssemblyCopyright("¯\\_(ツ)_/¯")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -20,17 +19,15 @@ using PsybotPlugin;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("bff7c86a-c9b3-4584-a047-0e110f650a80")]
+[assembly: Guid("f298043a-71a0-4e28-9b80-a71342aa96e5")]
 
 // Version information for an assembly consists of the following four values:
 //
 //      Major Version
 //      Minor Version
 //      Build Number
-//      Revision
+//      ~~Revision~~
 //
-// You can specify all the values or you can default the Build and Revision Numbers
-// by using the '*' as shown below:
-// [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion(Config.VERSION + ".*")]
-[assembly: AssemblyFileVersion(Config.VERSION)]
+
+[assembly: AssemblyVersion(PsybotModule.Config.VERSION + ".*")]
+//[assembly: AssemblyFileVersion("0.0.0.0")]

@@ -1,10 +1,11 @@
 ﻿using System;
 using System.IO;
+using System.Text;
 using System.Threading;
 using Discord;
-using Psybot.Plugins;
+using Psybot.Modules;
 using Psybot.UI;
-using PsybotPlugin;
+using PsybotModule;
 
 namespace Psybot
 {
@@ -21,19 +22,39 @@ namespace Psybot
 
         #endregion
 
-        private PluginManager pluginManager;
+        private ModuleManager moduleManager;
         private DiscordClient client;
         private bool stop;
+        private string tempCodeName;
+        private Discord.User userAdmin;
+        private System.Timers.Timer codeTimer;
+        private int waitCodeTime;
+        private string tempFileAdminID;
 
         // console commands:
-        private const string CMD_CONNECT    = "connect";
-        private const string CMD_DISCONNECT = "disconnect";
-        //private const string CMD_SEND       = "send";
-        private const string CMD_EXIT       = "exit";
-        private const string CMD_CLEAR      = "clear";
-        private const string CMD_EXPAND     = "expand";
-        private const string CMD_PLUGINS    = "plugins";
-        private const string CMD_COMMANDS   = "commands";
+        public const string CMD_CONNECT    = "connect";
+        public const string CMD_DISCONNECT = "disconnect";
+        //public const string CMD_SEND       = "send";
+        public const string CMD_EXIT       = "exit";
+        public const string CMD_CLEAR      = "clear";
+        public const string CMD_EXPAND     = "expand";
+        public const string CMD_MODULE     = "modules";
+        public const string CMD_COMMANDS   = "commands";
+        // admin commands
+        public const string CMD_ADMIN                 = "psy";
+        public const string CMD_ADMIN_ARG1_LOGIN      = "login";
+
+        public const string CMD_ADMIN_ARG1_MOD        = "mod";
+        public const string CMD_ADMIN_ARG2_MODINFO    = "info";
+        public const string CMD_ADMIN_ARG2_MODINSTALL = "install";
+        public const string CMD_ADMIN_ARG2_MODSEARCH  = "search";
+        public const string CMD_ADMIN_ARG2_MODENABLE  = "enable";
+        public const string CMD_ADMIN_ARG2_MODDISABLE = "disable";
+
+        public const string CMD_ADMIN_ARG1_DISCONNECT = "disconnect";
+
+        // temp login id
+        private const string ADMIN_FILE = "psy-admin.txt";
 
         public PsybotCore()
         {
@@ -41,7 +62,7 @@ namespace Psybot
             {
                 x.AppName = "Psybot";
 #if DEBUG
-                x.LogLevel = LogSeverity.Debug;
+                x.LogLevel = LogSeverity.Verbose;
 #else
                 x.LogLevel = LogSeverity.Info;
 #endif
@@ -49,7 +70,28 @@ namespace Psybot
                 //x.AppUrl = "???";
             });
 
-            pluginManager = new PluginManager(this as IPsybotCore);
+            moduleManager = new ModuleManager(this as IPsybotCore);
+            codeTimer = new System.Timers.Timer(1000.0);
+            codeTimer.AutoReset = true;
+            codeTimer.Elapsed += onEverySeconds;
+            codeTimer.Enabled = true;
+
+            if (File.Exists(ADMIN_FILE))
+            {
+                tempFileAdminID = File.ReadAllText(ADMIN_FILE);
+            }
+        }
+
+        private void onEverySeconds(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            if (waitCodeTime > 0)
+            {
+                waitCodeTime--;
+                if (waitCodeTime == 0)
+                {
+                    Term.Log("Code time is out.", ConsoleColor.White);
+                }
+            }
         }
 
         public void Run()
@@ -69,19 +111,204 @@ namespace Psybot
         // любое сообщение на сервере
         private void Client_MessageReceived(object sender, MessageEventArgs e)
         {
-            pluginManager.ExcecutePlugins(new PsybotPluginArgs
+            if (moduleManager.IsCommandContains(e.Message.RawText))
             {
-                Channel = e.Channel.ChannelForPlugin(),
-                Message = e.Message.MessageForPlugin(),
-                Server = e.Server.ServerForPlugin(),
-                User = e.User.UserForPlugin()
-            });
+                if (e.Message.RawText.StartsWith(CMD_ADMIN, StringComparison.Ordinal))
+                {
+                    excecutePsyCommand(e);
+                }
+                else
+                {
+                    var args = new PsybotModuleArgs
+                    {
+                        Channel = e.Channel.ChannelForModule(),
+                        Message = e.Message.MessageForModule(),
+                        Server = e.Server.ServerForModule(),
+                        User = e.User.UserForModule()
+                    };
+                    moduleManager.ExcecuteModules(args);
+                }
+            }
+        }
+
+        private async void excecutePsyCommand(MessageEventArgs e)
+        {
+            var commands = e.Message.RawText.Split(' ');
+            if (commands.Length > 1 && !string.IsNullOrWhiteSpace(commands[1]))
+            {
+                #region ADMIN LOGIN
+                // confirm key
+                if (waitCodeTime > 0)
+                {
+                    if (tempCodeName.Equals(commands[1], StringComparison.Ordinal))
+                    {
+                        userAdmin = e.User;
+                        waitCodeTime = 0;
+                        tempCodeName = null;
+
+                        // save ID. load on 'psy login'
+                        File.WriteAllText(ADMIN_FILE, userAdmin.Id.ToString());
+
+                        Term.Log($"Admin ID apply: {userAdmin.Name} ({userAdmin.Id})", ConsoleColor.White);
+                        await e.Channel.SendMessage(e.User.Mention + " :white_check_mark:");
+                    }
+                    return;
+                }
+
+                if (userAdmin == null)
+                {
+                    // must login
+                    if (commands[1] != CMD_ADMIN_ARG1_LOGIN)
+                        return;
+
+                    if (userAdmin == null && waitCodeTime == 0)
+                    {
+                        if (tempFileAdminID != null)
+                        {
+                            // load from save temp file
+                            if (tempFileAdminID.Equals(e.User.Id.ToString(), StringComparison.OrdinalIgnoreCase))
+                            {
+                                userAdmin = e.User;
+                                Term.Log($"Admin ID apply: {userAdmin.Name} ({userAdmin.Id})", ConsoleColor.White);
+                                await e.Channel.SendMessage(e.User.Mention + " :white_check_mark:");
+                            }
+                        }
+                        else
+                        {
+                            // set code
+                            tempCodeName = new Random().Next(1000, 10000).ToString();
+                            waitCodeTime = 60;
+                            Term.Log($"! Login confirm key - send '{CMD_ADMIN} {tempCodeName}' for 60 seconds", ConsoleColor.Magenta);
+                        }
+                    }
+                    return;
+                }
+                #endregion
+
+                switch (commands[1])
+                {
+                case CMD_ADMIN_ARG1_MOD:
+
+                    if (commands.Length > 2 && !string.IsNullOrWhiteSpace(commands[2]))
+                    {
+                        switch (commands[2])
+                        {
+                        case CMD_ADMIN_ARG2_MODINFO:
+
+                            await e.Channel.SendMessage(moduleManager.GetModulesInfo());
+                            break;
+
+                        case CMD_ADMIN_ARG2_MODINSTALL:
+
+                            int containsType = 0;
+                            if (commands.Length > 4)
+                            {
+                                // 2 - [skip] all, 3 - [reload] all
+                                if (commands[4].Equals("skip", StringComparison.OrdinalIgnoreCase))
+                                    containsType = 2;
+                                else if (commands[4].Equals("reload", StringComparison.OrdinalIgnoreCase))
+                                    containsType = 3;
+                            }
+                            if (commands.Length > 3)
+                            {
+                                var _log = moduleManager.LoadModuleLibrarys(
+                                    new [] { $"{ModuleManager.DEFAULT_MODULE_PATH}\\{commands[3]}.dll" }, // todo: more that one
+                                    containsType,
+                                    true);
+
+                                await e.Channel.SendMessage(_log);
+                            }
+                            else
+                            {
+                                await e.Channel.SendMessage("Missing module name arg.");
+                            }
+
+                            break;
+
+                        case CMD_ADMIN_ARG2_MODSEARCH:
+
+                            var sb = new StringBuilder("Avaiable modules:\n");
+
+                            var mods = moduleManager.GetAvaiableModules();
+                            if (mods.Length == 0)
+                            {
+                                sb.Append("(not found)");
+                            }
+                            else
+                            {
+                                for (int i = 0; i < mods.Length; i++)
+                                {
+                                    sb.AppendLine((i + 1) + ": " + mods[i]);
+                                }
+                            }
+
+                            await e.Channel.SendMessage(sb.ToString());
+                            break;
+
+                        case CMD_ADMIN_ARG2_MODENABLE:
+
+                            if (commands.Length > 3)
+                            {
+                                await e.Channel.SendMessage(
+                                    moduleManager.EnableModuleByName(commands[3]) ? "Module was enabled." : "Module not found.");
+                            }
+                            else
+                            {
+                                await e.Channel.SendMessage("Missing module name arg.");
+                            }
+
+                            break;
+
+                        case CMD_ADMIN_ARG2_MODDISABLE:
+
+                            if (commands.Length > 3)
+                            {
+                                await e.Channel.SendMessage(
+                                    moduleManager.DisableModuleByName(commands[3]) ? "Module was disabled." : "Module not found.");
+                            }
+                            else
+                            {
+                                await e.Channel.SendMessage("Missing module name arg.");
+                            }
+
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        var sb = new StringBuilder("Commands:\n");
+                        sb.AppendLine(CMD_ADMIN_ARG2_MODINFO + " - module information");
+                        sb.AppendLine(CMD_ADMIN_ARG2_MODINSTALL + " [module name] [skip/reload]* - install module");
+                        sb.AppendLine(CMD_ADMIN_ARG2_MODSEARCH + " - show modules library");
+                        sb.AppendLine(CMD_ADMIN_ARG2_MODENABLE + " [module name] - enable module");
+                        sb.AppendLine(CMD_ADMIN_ARG2_MODDISABLE + " [module name] - disable module");
+                        await e.Channel.SendMessage(sb.ToString());
+                    }
+
+                    break;
+
+                case CMD_ADMIN_ARG1_DISCONNECT:
+
+                    Term.Log("Disconnect from channel.", ConsoleColor.White);
+                    await client.Disconnect();
+
+                    break;
+                }
+            }
+            else
+            {
+                var sb = new StringBuilder("Commands:\n");
+                sb.AppendLine(CMD_ADMIN_ARG1_MOD + " - modules");
+                sb.AppendLine(CMD_ADMIN_ARG1_DISCONNECT + " - disconnect bot from server");
+                await e.Channel.SendMessage(sb.ToString());
+            }
         }
 
         private void Term_OnDraw()
         {
             Term.ClearLine(0);
 
+            // Y:0
             Term.Draw("State:", 0, 0, ConsoleColor.Gray);
 
             switch (client.State)
@@ -108,8 +335,18 @@ namespace Psybot
             }
 
             Term.Draw(
-                $" | MEM: {(GC.GetTotalMemory(false) / (1024L * 1024L))} mb | Plug-in: {pluginManager.GetEnabledPlugins}/{pluginManager.GetInstalledPlugins}",
+                $" | MEM: {(GC.GetTotalMemory(false) / (1024L * 1024L))} mb | Modules: {moduleManager.GetEnabledModules}/{moduleManager.GetInstalledModules}",
                 20, 0, ConsoleColor.Gray);
+
+            // Y:1
+            if (userAdmin == null)
+            {
+                Term.Draw("Psy admin: none", 0, 1, ConsoleColor.Gray);
+            }
+            else
+            {
+                Term.Draw("Psy admin: " + userAdmin.Name, 0, 1, ConsoleColor.Gray);
+            }
         }
 
         // console commands
@@ -186,10 +423,10 @@ namespace Psybot
                 Term.ReDrawLog();
             }, "Expadn console window.");
             // ====================================================================== //
-            Term.AddCommand(CMD_PLUGINS, (s) =>
+            Term.AddCommand(CMD_MODULE, (s) =>
             {
-                pluginManager.EnterGUI();
-            }, "Enter plugins manager.");
+                moduleManager.EnterGUI();
+            }, "Enter modules manager.");
             // ====================================================================== //
             Term.AddCommand(CMD_COMMANDS, (s) =>
             {
@@ -246,7 +483,7 @@ namespace Psybot
         /// <param name="color"> Text color. </param>
         public void SendLog(string mess, ConsoleColor color)
         {
-            // todo: auto detect owner plugin name
+            // todo: auto detect owner module name
             Term.Log("$ " + mess, color);
         }
 

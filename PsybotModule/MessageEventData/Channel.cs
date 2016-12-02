@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace PsybotPlugin.MessageEventData
+namespace PsybotModule.MessageEventData
 {
     public struct Channel
     {

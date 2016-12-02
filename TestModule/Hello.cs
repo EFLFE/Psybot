@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Threading.Tasks;
-using PsybotPlugin;
+using PsybotModule;
 
 namespace TestPlugin
 {
-    public sealed class Hello : IPsybotPlugin
+    /// <summary> Demo module for PsyBot. </summary>
+    public sealed class Hello : IPsybotModule
     {
         public string RunCommandName { get; set; }
 
@@ -29,12 +30,22 @@ namespace TestPlugin
             Console.WriteLine("'Hello' unload.");
         }
 
-        public async Task Excecute(PsybotPluginArgs e)
+        public async Task Excecute(PsybotModuleArgs e)
         {
             await Task.Run(() =>
             {
                 core.SendMessage(e.Channel.Id, "Hello, " + e.User.Mention);
             });
+        }
+
+        public void OnEnable()
+        {
+            Console.WriteLine("'Hello' enabled.");
+        }
+
+        public void OnDisable()
+        {
+            Console.WriteLine("'Hello' disabled.");
         }
     }
 }

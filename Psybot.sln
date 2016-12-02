@@ -8,9 +8,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Psybot", "Psybot\Psybot.csp
 		{F298043A-71A0-4E28-9B80-A71342AA96E5} = {F298043A-71A0-4E28-9B80-A71342AA96E5}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PsybotPlugin", "PsybotPlugin\PsybotPlugin.csproj", "{BFF7C86A-C9B3-4584-A047-0E110F650A80}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PsybotModule", "PsybotModule\PsybotModule.csproj", "{BFF7C86A-C9B3-4584-A047-0E110F650A80}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestPlugin", "TestPlugin\TestPlugin.csproj", "{F298043A-71A0-4E28-9B80-A71342AA96E5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestModule", "TestModule\TestModule.csproj", "{F298043A-71A0-4E28-9B80-A71342AA96E5}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D4DCED4B-431F-4D1C-8CFA-44AD70F86E02}"
 	ProjectSection(SolutionItems) = preProject
