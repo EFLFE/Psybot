@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using PsybotModule;
 
-namespace TestPlugin
+namespace TestModule
 {
     /// <summary> Demo module for PsyBot. </summary>
     public sealed class Hello : IPsybotModule
