@@ -299,6 +299,15 @@ namespace Psybot
 
                             if (commands.Length > 3)
                             {
+                                if (commands[3] == "all")
+                                {
+                                    var ins = moduleManager.GetInstalledModulesName;
+                                    for (int i = 0; i < ins.Length; i++)
+                                    {
+                                        moduleManager.EnableModuleByName(ins[i]);
+                                    }
+                                    goto case CMD_ADMIN_ARG2_MODINFO;
+                                }
                                 await e.Channel.SendMessage(
                                     moduleManager.EnableModuleByName(commands[3]) ? "Module was enabled." : "Module not found.");
                             }
@@ -313,6 +322,15 @@ namespace Psybot
 
                             if (commands.Length > 3)
                             {
+                                if (commands[3] == "all")
+                                {
+                                    var ins = moduleManager.GetInstalledModulesName;
+                                    for (int i = 0; i < ins.Length; i++)
+                                    {
+                                        moduleManager.DisableModuleByName(ins[i]);
+                                    }
+                                    goto case CMD_ADMIN_ARG2_MODINFO;
+                                }
                                 await e.Channel.SendMessage(
                                     moduleManager.DisableModuleByName(commands[3]) ? "Module was disabled." : "Module not found.");
                             }
@@ -342,11 +360,11 @@ namespace Psybot
                     {
                         var sb = new StringBuilder("**psy mod** commands:\n");
                         sb.AppendLine(CMD_ADMIN_ARG2_MODINFO + " - module information");
-                        sb.AppendLine(CMD_ADMIN_ARG2_MODINSTALL + " [module name/1,2,4,..] [skip/reload]* - install module");
+                        sb.AppendLine(CMD_ADMIN_ARG2_MODINSTALL + " [module_name/1,2,4,..] [skip/reload]* - install module");
                         sb.AppendLine(CMD_ADMIN_ARG2_MODSEARCH + " - show modules library");
-                        sb.AppendLine(CMD_ADMIN_ARG2_MODENABLE + " [module name] - enable module");
-                        sb.AppendLine(CMD_ADMIN_ARG2_MODDISABLE + " [module name] - disable module");
-                        sb.AppendLine(CMD_ADMIN_ARG2_MODREMOVE + " [module name] - remove module");
+                        sb.AppendLine(CMD_ADMIN_ARG2_MODENABLE + " [module_name/all] - enable module");
+                        sb.AppendLine(CMD_ADMIN_ARG2_MODDISABLE + " [module_name/all] - disable module");
+                        sb.AppendLine(CMD_ADMIN_ARG2_MODREMOVE + " [module_name] - remove module");
                         await e.Channel.SendMessage(sb.ToString());
                     }
 
@@ -400,7 +418,7 @@ namespace Psybot
             }
 
             Term.Draw(
-                $" | MEM: {(GC.GetTotalMemory(false) / (1024L * 1024L))} mb | Modules: {moduleManager.GetEnabledModules}/{moduleManager.GetInstalledModules}",
+                $" | MEM: {(GC.GetTotalMemory(false) / (1024L * 1024L))} mb | Modules: {moduleManager.GetEnabledModules}/{moduleManager.GetInstalledModulesCount}",
                 20, 0, ConsoleColor.Gray);
 
             // Y:1

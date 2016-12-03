@@ -37,9 +37,11 @@ namespace Psybot.Modules
         // RunCommandName array from all modulef for fast parse
         private List<string> runCommandsList;
 
-        public int GetInstalledModules => modulesListData.Count;
+        public int GetInstalledModulesCount => modulesListData.Count;
 
         public int GetEnabledModules => enabledModules;
+
+        public string[] GetInstalledModulesName => modulesDictData.Keys.ToArray();
 
         public ModuleManager(IPsybotCore ipsycore)
         {
@@ -318,8 +320,16 @@ namespace Psybot.Modules
                 {
                     enabledModules++;
                 }
-                modulesListData[index].Module.OnEnable();
-                modulesListData[index].Status = ModuleData.StatusEnum.Enable;
+                try
+                {
+                    modulesListData[index].Module.OnEnable();
+                    modulesListData[index].Status = ModuleData.StatusEnum.Enable;
+                }
+                catch (Exception ex)
+                {
+                    Term.Log(modulesListData[index].FileName + " error: " + ex.Message);
+                    modulesListData[index].Status = ModuleData.StatusEnum.Crash;
+                }
             }
         }
 
@@ -328,8 +338,14 @@ namespace Psybot.Modules
             if (modulesListData[index].Status != ModuleData.StatusEnum.Disable)
             {
                 modulesListData[index].Status = ModuleData.StatusEnum.Disable;
-                modulesListData[index].Module.OnDisable();
-                enabledModules--;
+                try
+                {
+                    modulesListData[index].Module.OnDisable();
+                }
+                finally
+                {
+                    enabledModules--;
+                }
             }
         }
 
