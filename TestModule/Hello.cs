@@ -21,13 +21,10 @@ namespace TestPlugin
             RunCommandName = "-hi";
             ParameterType = ParameterTypeEnum.Unparsed;
             CommandComparison = StringComparison.OrdinalIgnoreCase;
-
-            Console.WriteLine("'Hello' load.");
         }
 
         public void Unload()
         {
-            Console.WriteLine("'Hello' unload.");
         }
 
         public async Task Excecute(PsybotModuleArgs e)
@@ -40,12 +37,10 @@ namespace TestPlugin
 
         public void OnEnable()
         {
-            Console.WriteLine("'Hello' enabled.");
         }
 
         public void OnDisable()
         {
-            Console.WriteLine("'Hello' disabled.");
         }
     }
 }

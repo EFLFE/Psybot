@@ -201,7 +201,7 @@ namespace Psybot.Modules
                 {
                     Term.Draw("[Arrow] - Navigation | [E] Enable | [D] Disable | [R] Remove", 0, Console.WindowHeight - 2);
                 }
-                Term.Draw("[I] Module info     | [B] Back   | [F] Find new modules", 0, Console.WindowHeight - 1);
+                Term.Draw("[I] Module info      | [B] Back   | [F] Find new modules", 0, Console.WindowHeight - 1);
 
                 if (modulesListData.Count == 0)
                 {
@@ -357,12 +357,15 @@ namespace Psybot.Modules
             Console.Clear();
         }
 
-        public string[] GetAvaiableModules()
+        public string[] GetAvaiableModules(bool nameOnly)
         {
             string[] mods = Directory.GetFiles(DEFAULT_MODULE_PATH, "*.dll");
-            for (int i = 0; i < mods.Length; i++)
+            if (nameOnly)
             {
-                mods[i] = Path.GetFileNameWithoutExtension(mods[i]);
+                for (int i = 0; i < mods.Length; i++)
+                {
+                    mods[i] = Path.GetFileNameWithoutExtension(mods[i]);
+                }
             }
             return mods;
         }
@@ -486,12 +489,12 @@ namespace Psybot.Modules
                 var modFileName = Path.GetFileNameWithoutExtension(path[i]);
 
                 Term.FastDraw("\n> " + path[i] + "\n", ConsoleColor.White);
-                sb?.AppendLine("> " + modFileName);
+                sb?.AppendLine("> Installing '**" + modFileName + "**'");
 
                 if (!File.Exists(path[i]))
                 {
                     Term.FastDraw("Error: File not found.\n", ConsoleColor.Red);
-                    sb?.AppendLine("Error: Module not found.");
+                    sb?.AppendLine(":warning: Error: Module not found.");
                     continue;
                 }
 
@@ -503,7 +506,7 @@ namespace Psybot.Modules
                         if (returnLog && containsType < 2)
                         {
                             // we can not run Term.ReadKey
-                            sb.AppendLine("This module already exists.\nUse args:\n  [skip] - skip all\n  [reload] - reload all");
+                            sb.AppendLine(":warning: This module already exists.\nUse args:\n  [skip] - skip all\n  [reload] - reload all");
                             goto RETURN;
                         }
                         else
@@ -579,7 +582,9 @@ namespace Psybot.Modules
                     if (typeIndex == -1)
                     {
                         errors++;
-                        Term.FastDraw("Fail: Interface 'IPsybotModule' not found.\n", ConsoleColor.Red);
+                        var errorText = "Fail: Interface 'IPsybotModule' not found.\n";
+                        sb?.Append(":warning: " + errorText);
+                        Term.FastDraw(errorText, ConsoleColor.Red);
                         continue;
                     }
 
@@ -595,7 +600,7 @@ namespace Psybot.Modules
                     {
                         errors++;
                         var errorText = "Error: 'RunCommandName' is not set.\n";
-                        sb?.Append(errorText);
+                        sb?.Append(":warning: " + errorText);
                         Term.FastDraw(errorText, ConsoleColor.Red);
                         continue;
                     }
@@ -603,7 +608,7 @@ namespace Psybot.Modules
                     {
                         errors++;
                         var errorText = "Error: 'RunCommandName' text size should not be more than 18.\n";
-                        sb?.Append(errorText);
+                        sb?.Append(":warning: " + errorText);
                         Term.FastDraw(errorText, ConsoleColor.Red);
                         continue;
                     }
@@ -611,7 +616,7 @@ namespace Psybot.Modules
                     {
                         errors++;
                         var errorText = "Error: 'RunCommandName' can not start with '" + PsybotCore.CMD_ADMIN + "'.\n";
-                        sb?.Append(errorText);
+                        sb?.Append(":warning: " + errorText);
                         Term.FastDraw(errorText, ConsoleColor.Red);
                         continue;
                     }
@@ -624,7 +629,7 @@ namespace Psybot.Modules
                     // success
                     loaded++;
 
-                    sb?.AppendLine("Success");
+                    sb?.AppendLine(":white_check_mark: Success");
                     Term.FastDraw("Success\n", ConsoleColor.Green);
                 }
                 catch (Exception ex)
@@ -638,7 +643,7 @@ namespace Psybot.Modules
                     }
 
                     var exText = "Exception: " + ex.Message + " \n";
-                    sb?.Append(exText);
+                    sb?.Append(":warning: " + exText);
                     Term.FastDraw(exText, ConsoleColor.Red);
                 }
             }
@@ -651,8 +656,8 @@ namespace Psybot.Modules
             {
                 Term.FastDraw("\nPress any key ", ConsoleColor.White);
                 Term.ReadKey(true); // !!!
+                Console.Clear();
             }
-            Console.Clear();
 
         RETURN:
             if (returnLog)

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -50,6 +51,7 @@ namespace Psybot
         public const string CMD_ADMIN_ARG2_MODSEARCH  = "search";
         public const string CMD_ADMIN_ARG2_MODENABLE  = "enable";
         public const string CMD_ADMIN_ARG2_MODDISABLE = "disable";
+        public const string CMD_ADMIN_ARG2_MODREMOVE  = "remove";
 
         public const string CMD_ADMIN_ARG1_DISCONNECT = "disconnect";
 
@@ -115,7 +117,14 @@ namespace Psybot
             {
                 if (e.Message.RawText.StartsWith(CMD_ADMIN, StringComparison.Ordinal))
                 {
-                    excecutePsyCommand(e);
+                    try
+                    {
+                        excecutePsyCommand(e);
+                    }
+                    catch (Exception ex)
+                    {
+                        Term.Log("Psy command error: " + ex.Message, ConsoleColor.Red);
+                    }
                 }
                 else
                 {
@@ -197,7 +206,7 @@ namespace Psybot
 
                             await e.Channel.SendMessage(moduleManager.GetModulesInfo());
                             break;
-
+                        // =================================================================== //
                         case CMD_ADMIN_ARG2_MODINSTALL:
 
                             int containsType = 0;
@@ -211,10 +220,51 @@ namespace Psybot
                             }
                             if (commands.Length > 3)
                             {
-                                var _log = moduleManager.LoadModuleLibrarys(
-                                    new [] { $"{ModuleManager.DEFAULT_MODULE_PATH}\\{commands[3]}.dll" }, // todo: more that one
-                                    containsType,
-                                    true);
+                                var ava = moduleManager.GetAvaiableModules(false);
+                                int n;
+                                string _log = string.Empty;
+
+                                if (int.TryParse(commands[3], out n))
+                                {
+                                    // is single number
+                                    _log = moduleManager.LoadModuleLibrarys(
+                                        new[] { $"{ModuleManager.DEFAULT_MODULE_PATH}\\{ava[n]}.dll" }, // todo: more that one
+                                        containsType,
+                                        true);
+                                }
+                                else if (commands[3].Contains(","))
+                                {
+                                    // numbers
+                                    string[] numbers = commands[3].Split(',');
+                                    var avaList = new List<string>(numbers.Length);
+
+                                    for (n = 0; n < numbers.Length; n++)
+                                    {
+                                        int num;
+                                        if (int.TryParse(numbers[n], out num))
+                                        {
+                                            avaList.Add(ava[num - 1]);
+                                        }
+                                        else
+                                        {
+                                            await e.Channel.SendMessage("Error: Bad bumbers format. Sample: 1,2,4");
+                                            return;
+                                        }
+                                    }
+
+                                    _log = moduleManager.LoadModuleLibrarys(
+                                        avaList.ToArray(),
+                                        containsType,
+                                        true);
+                                }
+                                else
+                                {
+                                    // string name
+                                    _log = moduleManager.LoadModuleLibrarys(
+                                        new[] { $"{ModuleManager.DEFAULT_MODULE_PATH}\\{commands[3]}.dll" },
+                                        containsType,
+                                        true);
+                                }
 
                                 await e.Channel.SendMessage(_log);
                             }
@@ -224,12 +274,12 @@ namespace Psybot
                             }
 
                             break;
-
+                        // =================================================================== //
                         case CMD_ADMIN_ARG2_MODSEARCH:
 
                             var sb = new StringBuilder("Avaiable modules:\n");
 
-                            var mods = moduleManager.GetAvaiableModules();
+                            var mods = moduleManager.GetAvaiableModules(true);
                             if (mods.Length == 0)
                             {
                                 sb.Append("(not found)");
@@ -244,7 +294,7 @@ namespace Psybot
 
                             await e.Channel.SendMessage(sb.ToString());
                             break;
-
+                        // =================================================================== //
                         case CMD_ADMIN_ARG2_MODENABLE:
 
                             if (commands.Length > 3)
@@ -258,7 +308,7 @@ namespace Psybot
                             }
 
                             break;
-
+                        // =================================================================== //
                         case CMD_ADMIN_ARG2_MODDISABLE:
 
                             if (commands.Length > 3)
@@ -272,16 +322,31 @@ namespace Psybot
                             }
 
                             break;
+                        // =================================================================== //
+                        case CMD_ADMIN_ARG2_MODREMOVE:
+
+                            if (commands.Length > 3)
+                            {
+                                await e.Channel.SendMessage(
+                                    moduleManager.UnloadModule(commands[3], true) ? "Module was removed." : "Module not found.");
+                            }
+                            else
+                            {
+                                await e.Channel.SendMessage("Missing module name arg.");
+                            }
+
+                            break;
                         }
                     }
                     else
                     {
-                        var sb = new StringBuilder("Commands:\n");
+                        var sb = new StringBuilder("**psy mod** commands:\n");
                         sb.AppendLine(CMD_ADMIN_ARG2_MODINFO + " - module information");
-                        sb.AppendLine(CMD_ADMIN_ARG2_MODINSTALL + " [module name] [skip/reload]* - install module");
+                        sb.AppendLine(CMD_ADMIN_ARG2_MODINSTALL + " [module name/1,2,4,..] [skip/reload]* - install module");
                         sb.AppendLine(CMD_ADMIN_ARG2_MODSEARCH + " - show modules library");
                         sb.AppendLine(CMD_ADMIN_ARG2_MODENABLE + " [module name] - enable module");
                         sb.AppendLine(CMD_ADMIN_ARG2_MODDISABLE + " [module name] - disable module");
+                        sb.AppendLine(CMD_ADMIN_ARG2_MODREMOVE + " [module name] - remove module");
                         await e.Channel.SendMessage(sb.ToString());
                     }
 
@@ -289,7 +354,7 @@ namespace Psybot
 
                 case CMD_ADMIN_ARG1_DISCONNECT:
 
-                    Term.Log("Disconnect from channel.", ConsoleColor.White);
+                    Term.Log("Disconnect from channel (from chat).", ConsoleColor.White);
                     await client.Disconnect();
 
                     break;
@@ -297,7 +362,7 @@ namespace Psybot
             }
             else
             {
-                var sb = new StringBuilder("Commands:\n");
+                var sb = new StringBuilder("**psy** commands:\n");
                 sb.AppendLine(CMD_ADMIN_ARG1_MOD + " - modules");
                 sb.AppendLine(CMD_ADMIN_ARG1_DISCONNECT + " - disconnect bot from server");
                 await e.Channel.SendMessage(sb.ToString());
