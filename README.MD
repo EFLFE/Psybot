@@ -2,9 +2,9 @@
 
 ## Release info
 
-Last release version: **0.1.4 βeta** _(24.11.16)_
+Last release version: **0.2.0 βeta** _(24.11.16)_
 
-Last PsybotPlugin version: **0.1.2** _(24.11.16)_
+Last PsybotPlugin version: **0.2.0** _(24.11.16)_
 
 * * *
 ## Psybot
@@ -12,7 +12,7 @@ Bot for [Discord](https://discordapp.com), writing on C# with using [Discord.Net
 
 The main feature is a dynamic functional expandability using libraries.
 
-You can write library using **PsybotPlugin** and get a plug-in, which can be loaded intro Psybot program witchout restarting and reassembly. Or you can find exists plug-in (in future).
+You can write library using **PsybotPlugin** and get a module, which can be loaded intro Psybot program witchout restarting and reassembly. Or you can find exists module.
 
 Instructions in the Wiki.
 
@@ -33,9 +33,9 @@ Coming soon.
 **Token:**
 You must have to create a **token.txt** file in the program folder and put the Token key for bot.
 
-## Installation plugins
+## Installation modules
 
-By default the plugins in a **Plugins** directory as **.dll** files.
+By default the modules in a **Modules** directory as **.dll** files.
 
 ## Dependency
 
@@ -54,7 +54,7 @@ NuGet library:
 ## TODO
 
 - [ ] Custom terminal commands
-- [ ] PsybotPlugin Version on load dll
+- [ ] Check PsybotModule Version on load dll
 - [ ] Minimize to tray for Winodws
-- [ ] Get decriptrion for command from channel
-- [ ] Plugin for administration management
+- [ ] Get desriptrion for command from channel
+- [x] Module for administration management
