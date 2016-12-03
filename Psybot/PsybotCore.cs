@@ -541,6 +541,13 @@ namespace Psybot
             await client.GetChannel(channelID)?.SendMessage(message);
         }
 
+        public async void SendImage(ulong channelID, string filePath)
+        {
+            if (!Connected || !File.Exists(filePath))
+                return;
+            await client.GetChannel(channelID)?.SendFile(filePath);
+        }
+
         /// <summary>
         ///     Write a text to server log.
         /// </summary>

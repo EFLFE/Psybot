@@ -33,5 +33,12 @@ namespace PsybotModule
         /// <param name="mess"> Text. </param>
         /// <param name="color"> Text color. </param>
         void SendLog(string mess, ConsoleColor color);
+
+        /// <summary>
+        ///     Send file.
+        /// </summary>
+        /// <param name="channelID"> Channel ID. </param>
+        /// <param name="filePath"> File path. </param>
+        void SendImage(ulong channelID, string filePath);
     }
 }
