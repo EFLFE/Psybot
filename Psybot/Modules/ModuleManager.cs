@@ -129,7 +129,7 @@ namespace Psybot.Modules
         }
 
         // on user send message
-        public async void ExcecuteModules(PsybotModuleArgs args)
+        public async void ExcecuteModules(Message args)
         {
             // for modules
             for (int i = 0; i < modulesListData.Count; i++)
@@ -140,11 +140,11 @@ namespace Psybot.Modules
                     // check command
                     string cmd = modulesListData[i].Module.RunCommandName;
 
-                    if (args.Message.RawText.StartsWith(cmd, modulesListData[i].Module.CommandComparison))
+                    if (args.Content.StartsWith(cmd, modulesListData[i].Module.CommandComparison))
                     {
                         try
                         {
-                            args.Message.Text = args.Message.RawText.Remove(0, modulesListData[i].Module.RunCommandName.Length).Trim(); // rm command
+                            args.Content = args.Content.Remove(0, modulesListData[i].Module.RunCommandName.Length).Trim(); // rm command
 
                             await modulesListData[i].Module.Excecute(args);
                         }

@@ -7,6 +7,6 @@ namespace PsybotModule
         /// <summary>
         ///     The version of PsybotModule library.
         /// </summary>
-        public const string VERSION = "0.2.0";
+        public const string VERSION = "0.3.0";
     }
 }

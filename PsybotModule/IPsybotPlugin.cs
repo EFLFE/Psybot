@@ -48,6 +48,6 @@ namespace PsybotModule
         ///     Excecute when enter command name from chat.
         /// </summary>
         /// <param name="e"> Args. </param>
-        Task Excecute(PsybotModuleArgs e);
+        Task Excecute(Message e);
     }
 }

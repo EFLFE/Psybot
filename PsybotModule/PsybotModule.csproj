@@ -45,13 +45,9 @@
     <Compile Include="Config.cs" />
     <Compile Include="IPsybotCore.cs" />
     <Compile Include="IPsybotPlugin.cs" />
-    <Compile Include="MessageEventData\Channel.cs" />
-    <Compile Include="MessageEventData\Message.cs" />
-    <Compile Include="MessageEventData\Server.cs" />
-    <Compile Include="MessageEventData\User.cs" />
+    <Compile Include="Message.cs" />
     <Compile Include="ParameterType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="PsybotPluginArgs.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
