@@ -31,9 +31,6 @@ namespace PsybotModule
 		/// <summary> Is Bot. </summary>
 		public bool IsBot;
 
-		/// <summary> Avatar ID. </summary>
-		public string AvatarId;
-
 		/// <summary> Avatar URL. </summary>
 		public string AvatarUrl;
 
@@ -43,7 +40,8 @@ namespace PsybotModule
 		/// <summary> Is TTS. </summary>
 		public bool IsTTS;
 
-		public Message(ulong messageId, ulong channelId, string channelName, DateTimeOffset createdAt, string content, string userName, string userMention, bool isBot, string avatarId, string avatarUrl, bool isPinned, bool isTTS)
+		public Message(ulong messageId, ulong channelId, string channelName, DateTimeOffset createdAt, string content, string userName,
+			string userMention, bool isBot, string avatarUrl, bool isPinned, bool isTTS)
 		{
 			ChannelId = channelId;
 			MessageId = messageId;
@@ -53,7 +51,6 @@ namespace PsybotModule
 			UserName = userName;
 			UserMention = userMention;
 			IsBot = isBot;
-			AvatarId = avatarId;
 			AvatarUrl = avatarUrl;
 			IsPinned = isPinned;
 			IsTTS = isTTS;

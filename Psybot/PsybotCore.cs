@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
-using Discord;
-using Discord.WebSocket;
+
+using DSharpPlus;
+
 using Psybot.Modules;
 using Psybot.UI;
 using PsybotModule;
@@ -16,30 +16,29 @@ namespace Psybot
 	{
 		private const string TOKEN_FILE = "token.txt";
 
+		private bool connected;
+
 		#region IPsybotCore VARS
 
-		/// <summary>
-		///     Get connected status.
-		/// </summary>
-		public bool Connected => client == null ? false : client.ConnectionState == ConnectionState.Connected;
+		/// <summary> Get connected status. </summary>
+		public bool Connected => connected;
 
 		#endregion
 
 		private ModuleManager moduleManager;
-		private DiscordSocketClient client;
+		private DiscordClient client;
 		private bool stop;
-		private SocketUser userAdmin;
+		private DiscordUser userAdmin;
 		private string tempFileAdminID;
 
 		// console commands:
 		public const string CMD_CONNECT    = "connect";
 		public const string CMD_DISCONNECT = "disconnect";
-		//public const string CMD_SEND       = "send";
+		public const string CMD_SEND       = "send";
 		public const string CMD_EXIT       = "exit";
 		public const string CMD_CLEAR      = "clear";
 		public const string CMD_EXPAND     = "expand";
 		public const string CMD_MODULE     = "modules";
-		public const string CMD_SEND       = "send";
 		public const string CMD_COMMANDS   = "commands";
 		// admin commands
 		public const string CMD_ADMIN                 = "psy";
@@ -60,30 +59,6 @@ namespace Psybot
 
 		public PsybotCore()
 		{
-			/*
-            client = new DiscordSocketClient(x =>
-            {
-                x.AppName = "Psybot";
-#if DEBUG
-                x.LogLevel = LogSeverity.Verbose;
-#else
-                x.LogLevel = LogSeverity.Info;
-#endif
-                x.LogHandler = Log;
-                //x.AppUrl = "???";
-            });
-			*/
-			var conf = new DiscordSocketConfig();
-			conf.ConnectionTimeout = 5000;
-#if DEBUG
-			conf.LogLevel = LogSeverity.Debug;
-#else
-			conf.LogLevel = LogSeverity.Verbose;
-#endif
-			client = new DiscordSocketClient(conf);
-
-			client.Log += Client_Log;
-
 			moduleManager = new ModuleManager(this as IPsybotCore);
 
 			if (File.Exists(ADMIN_FILE))
@@ -95,7 +70,6 @@ namespace Psybot
 		public void Run()
 		{
 			Term.OnDraw += Term_OnDraw;
-			client.MessageReceived += Client_MessageReceived;
 
 			addCommands();
 			Term.Start();
@@ -106,11 +80,11 @@ namespace Psybot
 			}
 		}
 
-		private Task Client_MessageReceived(SocketMessage arg)
+		private void Client_MessageCreated(object sender, MessageCreateEventArgs arg)
 		{
-			if (moduleManager.IsCommandContains(arg.Content))
+			if (moduleManager.IsCommandContains(arg.Message.Content))
 			{
-				if (arg.Content.StartsWith(CMD_ADMIN, StringComparison.Ordinal))
+				if (arg.Message.Content.StartsWith(CMD_ADMIN, StringComparison.Ordinal))
 				{
 					try
 					{
@@ -123,17 +97,18 @@ namespace Psybot
 				}
 				else
 				{
-					var msg = new Message(arg.Id, arg.Channel.Id, arg.Channel.Name, arg.CreatedAt, arg.Content, arg.Author.Username,
-						arg.Author.Mention, arg.Author.IsBot, arg.Author.AvatarId, arg.Author.AvatarUrl, arg.IsPinned, arg.IsTTS);
+					var msg = new Message(arg.Message.ID, arg.Channel.ID, arg.Channel.Name, arg.Message.CreationDate, arg.Message.Content,
+						arg.Message.Author.Username, arg.Message.Author.Mention, arg.Message.Author.IsBot, arg.Message.Author.AvatarUrl,
+						arg.Message.Pinned, arg.Message.TTS);
+
 					moduleManager.ExcecuteModules(msg);
 				}
 			}
-			return null;
 		}
 
-		private async void excecutePsyCommand(SocketMessage e)
+		private async void excecutePsyCommand(MessageCreateEventArgs arg)
 		{
-			var commands = e.Content.Split(' ');
+			var commands = arg.Message.Content.Split(' ');
 			if (commands.Length > 1 && !string.IsNullOrWhiteSpace(commands[1]))
 			{
 				#region ADMIN LOGIN
@@ -148,9 +123,9 @@ namespace Psybot
 						if (tempFileAdminID != null)
 						{
 							// load from save temp file
-							if (tempFileAdminID.Equals(e.Author.Id.ToString(), StringComparison.OrdinalIgnoreCase))
+							if (tempFileAdminID.Equals(arg.Message.Author.ID.ToString(), StringComparison.OrdinalIgnoreCase))
 							{
-								userAdmin = e.Author;
+								userAdmin = arg.Message.Author;
 							}
 						}
 					}
@@ -169,7 +144,7 @@ namespace Psybot
 						{
 						case CMD_ADMIN_ARG2_MODINFO:
 
-							await e.Channel.SendMessageAsync(moduleManager.GetModulesInfo());
+							await arg.Channel.SendMessage(moduleManager.GetModulesInfo());
 							break;
 						// =================================================================== //
 						case CMD_ADMIN_ARG2_MODINSTALL:
@@ -212,7 +187,7 @@ namespace Psybot
 										}
 										else
 										{
-											await e.Channel.SendMessageAsync("Error: Bad bumbers format. Sample: 1,2,4");
+											await arg.Channel.SendMessage("Error: Bad bumbers format. Sample: 1,2,4");
 											return;
 										}
 									}
@@ -231,11 +206,11 @@ namespace Psybot
 										true);
 								}
 
-								await e.Channel.SendMessageAsync(_log);
+								await arg.Channel.SendMessage(_log);
 							}
 							else
 							{
-								await e.Channel.SendMessageAsync("Missing module name arg.");
+								await arg.Channel.SendMessage("Missing module name arg.");
 							}
 
 							break;
@@ -257,7 +232,7 @@ namespace Psybot
 								}
 							}
 
-							await e.Channel.SendMessageAsync(sb.ToString());
+							await arg.Channel.SendMessage(sb.ToString());
 							break;
 						// =================================================================== //
 						case CMD_ADMIN_ARG2_MODENABLE:
@@ -273,12 +248,12 @@ namespace Psybot
 									}
 									goto case CMD_ADMIN_ARG2_MODINFO;
 								}
-								await e.Channel.SendMessageAsync(
+								await arg.Channel.SendMessage(
 									moduleManager.EnableModuleByName(commands[3]) ? "Module was enabled." : "Module not found.");
 							}
 							else
 							{
-								await e.Channel.SendMessageAsync("Missing module name arg.");
+								await arg.Channel.SendMessage("Missing module name arg.");
 							}
 
 							break;
@@ -296,12 +271,12 @@ namespace Psybot
 									}
 									goto case CMD_ADMIN_ARG2_MODINFO;
 								}
-								await e.Channel.SendMessageAsync(
+								await arg.Channel.SendMessage(
 									moduleManager.DisableModuleByName(commands[3]) ? "Module was disabled." : "Module not found.");
 							}
 							else
 							{
-								await e.Channel.SendMessageAsync("Missing module name arg.");
+								await arg.Channel.SendMessage("Missing module name arg.");
 							}
 
 							break;
@@ -310,12 +285,12 @@ namespace Psybot
 
 							if (commands.Length > 3)
 							{
-								await e.Channel.SendMessageAsync(
+								await arg.Channel.SendMessage(
 									moduleManager.UnloadModule(commands[3], true) ? "Module was removed." : "Module not found.");
 							}
 							else
 							{
-								await e.Channel.SendMessageAsync("Missing module name arg.");
+								await arg.Channel.SendMessage("Missing module name arg.");
 							}
 
 							break;
@@ -330,15 +305,15 @@ namespace Psybot
 						sb.AppendLine(CMD_ADMIN_ARG2_MODENABLE + " [module_name/all] - enable module");
 						sb.AppendLine(CMD_ADMIN_ARG2_MODDISABLE + " [module_name/all] - disable module");
 						sb.AppendLine(CMD_ADMIN_ARG2_MODREMOVE + " [module_name] - remove module");
-						await e.Channel.SendMessageAsync(sb.ToString());
+						await arg.Channel.SendMessage(sb.ToString());
 					}
 
 					break;
 
 				case CMD_ADMIN_ARG1_DISCONNECT:
 
-					Term.Log("Disconnect from channel (from chat).", ConsoleColor.White);
-					await client.DisconnectAsync();
+					Term.Log("Disconnect from channel.", ConsoleColor.White);
+					await client.Disconnect();
 
 					break;
 				}
@@ -348,7 +323,7 @@ namespace Psybot
 				var sb = new StringBuilder("**psy** commands:\n");
 				sb.AppendLine(CMD_ADMIN_ARG1_MOD + " - modules");
 				sb.AppendLine(CMD_ADMIN_ARG1_DISCONNECT + " - disconnect bot from server");
-				await e.Channel.SendMessageAsync(sb.ToString());
+				await arg.Channel.SendMessage(sb.ToString());
 			}
 		}
 
@@ -359,27 +334,13 @@ namespace Psybot
 			// Y:0
 			Term.Draw("State:", 0, 0, ConsoleColor.Gray);
 
-			switch (client.ConnectionState)
+			if (connected)
 			{
-			case ConnectionState.Disconnected:
-				Term.Draw("Disconnected", 7, 0, ConsoleColor.Red);
-				break;
-
-			case ConnectionState.Connecting:
-				Term.Draw("Connecting", 7, 0, ConsoleColor.Yellow);
-				break;
-
-			case ConnectionState.Connected:
-				Term.Draw("Connected", 7, 0, ConsoleColor.Green);
-				break;
-
-			case ConnectionState.Disconnecting:
-				Term.Draw("Disconnecting", 7, 0, ConsoleColor.Yellow);
-				break;
-
-			default:
-				Term.Draw(client.ConnectionState.ToString(), 7, 0, ConsoleColor.Gray);
-				break;
+				Term.Draw("Connected", 7, 0, ConsoleColor.Blue);
+			}
+			else
+			{
+				Term.Draw("Disconnected", 7, 0, ConsoleColor.DarkRed);
 			}
 
 			Term.Draw(
@@ -402,19 +363,39 @@ namespace Psybot
 		{
 			Term.AddCommand(CMD_CONNECT, async (s) =>
 			{
-				if (!File.Exists(TOKEN_FILE))
-				{
-					Term.Log("Token file '" + TOKEN_FILE + "' not found.", ConsoleColor.Red);
-					return;
-				}
-
 				try
 				{
+					if (client == null)
+					{
+						// Create Discord Client
+						if (!File.Exists(TOKEN_FILE))
+						{
+							Term.Log("Token file '" + TOKEN_FILE + "' not found.", ConsoleColor.Red);
+							return;
+						}
+						client = new DiscordClient(new DiscordConfig()
+						{
+							Token = File.ReadAllText(TOKEN_FILE),
+							TokenType = TokenType.Bot,
+							DiscordBranch = Branch.Canary,
+#if DEBUG
+							LogLevel = LogLevel.Debug,
+#else
+							LogLevel = LogLevel.Info,
+#endif
+							UseInternalLogHandler = true,
+							AutoReconnect = true
+						});
+
+						client.DebugLogger.LogMessageReceived += DebugLogger_LogMessageReceived;
+						client.Ready += Client_Ready;
+						client.SocketOpened += Client_SocketOpened;
+						client.SocketClosed += Client_SocketClosed;
+						client.MessageCreated += Client_MessageCreated;
+					}
+
 					var tocken = File.ReadAllText(TOKEN_FILE);
-					// Configure the client to use a Bot token, and use our token
-					await client.LoginAsync(TokenType.Bot, tocken);
-					// Connect the client to Discord's gateway
-					await client.ConnectAsync();
+					await client.Connect();
 				}
 				catch (Exception ex)
 				{
@@ -430,7 +411,7 @@ namespace Psybot
 					Term.Log("DiscordClient is null.", ConsoleColor.Yellow);
 					return;
 				}
-				await client.DisconnectAsync();
+				await client.Disconnect();
 			}, "Disonnect from server.");
 			// ====================================================================== //
 			//Term.AddCommand(CMD_SEND, async (s) =>
@@ -447,7 +428,7 @@ namespace Psybot
 			{
 				if (Connected)
 				{
-					client.DisconnectAsync();
+					client.Disconnect();
 				}
 				stop = true;
 			}, "Close this program.");
@@ -491,39 +472,44 @@ namespace Psybot
 			}, "Send message (test).");
 		}
 
+		private void Client_SocketClosed(object sender, WebSocketSharp.CloseEventArgs e)
+		{
+			connected = false;
+			Term.Log("Socket Closed: " + e.Reason, ConsoleColor.Yellow);
+		}
+
+		private void Client_SocketOpened(object sender, EventArgs e)
+		{
+			Term.Log("Socket Opened", ConsoleColor.Green);
+		}
+
+		private void Client_Ready(object sender, EventArgs e)
+		{
+			connected = true;
+			Term.Log("Bot ready", ConsoleColor.Green);
+		}
+
 		// Discord.Net client log
-		private Task Client_Log(LogMessage e)
+		private void DebugLogger_LogMessageReceived(object sender, DebugLogMessageEventArgs e)
 		{
 			var clr = ConsoleColor.Gray;
-			switch (e.Severity)
+			switch (e.Level)
 			{
-			case LogSeverity.Error:
-				clr = ConsoleColor.Red;
-				break;
-
-			case LogSeverity.Warning:
-				clr = ConsoleColor.Yellow;
-				break;
-
-			case LogSeverity.Info:
+			case LogLevel.Info:
 				clr = ConsoleColor.White;
 				break;
 
-			case LogSeverity.Verbose:
-				//clr = ConsoleColor.Gray;
+			case LogLevel.Warning:
+				clr = ConsoleColor.Yellow;
 				break;
 
-			case LogSeverity.Debug:
-				clr = ConsoleColor.Gray;
-				break;
-
-			case LogSeverity.Critical:
+			case LogLevel.Error:
+			case LogLevel.Critical:
 				clr = ConsoleColor.Red;
 				break;
 			}
 
-			Term.Log($"{e.Source}: {e.Message}", clr);
-			return null;
+			Term.Log($"{e.Level}: {e.Message}", clr);
 		}
 
 		#region IPsybotCore METHODS
@@ -535,23 +521,15 @@ namespace Psybot
 		{
 			if (!Connected)
 				return;
-			var ca = client.GetChannel(channelID);
-			if (ca != null)
-			{
-				// TODO: Test send message.
-				await (ca as IMessageChannel).SendMessageAsync(message);
-			}
+
+			await client.SendMessage(channelID, message, false);
 		}
 
-		public async void SendImage(ulong channelID, string filePath, string text)
+		[Obsolete("Not ready.")]
+		public void SendImage(ulong channelID, string filePath, string text)
 		{
-			if (!Connected || !File.Exists(filePath))
-				return;
-			var ca = client.GetChannel(channelID);
-			if (ca != null)
-			{
-				await (ca as IMessageChannel).SendFileAsync(filePath, text);
-			}
+			// TODO: SendImage
+			return;
 		}
 
 		/// <summary>
