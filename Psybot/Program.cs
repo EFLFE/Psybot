@@ -10,7 +10,7 @@ namespace Psybot
 
         public static void Main(string[] args)
         {
-            Console.WriteLine("Psybot  v" + VERSION + " -=- Loading...");
+            Console.WriteLine("Psybot v" + VERSION + " Loading...");
             Console.Title = "Psybot  v" + VERSION;
 
             try
@@ -31,8 +31,9 @@ namespace Psybot
             Thread.Sleep(333);
 
             Console.WriteLine("\nterminated");
-            //Console.ReadLine();
-        }
+			Console.ForegroundColor = ConsoleColor.Gray;
+			//Console.ReadLine();
+		}
 
     }
 }

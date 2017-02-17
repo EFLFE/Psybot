@@ -207,20 +207,23 @@ namespace Psybot.UI
                                     args = spl[1].Trim();
                                 }
 
-                                OnCommandEnter?.Invoke(inputText, args);
+								if (inputText.Trim().Length > 0)
+								{
+									OnCommandEnter?.Invoke(inputText, args);
 
-                                if (commands.ContainsKey(inputText))
-                                {
-                                    Log("> " + inputText, ConsoleColor.Gray);
-                                    commands[inputText].Item1.Invoke(args);
-                                }
-                                else
-                                {
-                                    Log($"Unknown command \'{inputText}\'", ConsoleColor.Gray);
-                                }
+									if (commands.ContainsKey(inputText))
+									{
+										Log("> " + inputText, ConsoleColor.Gray);
+										commands[inputText].Item1.Invoke(args);
+									}
+									else
+									{
+										Log($"Unknown command \'{inputText}\'", ConsoleColor.Gray);
+									}
 
-                                //Draw(inputText, 1, Console.WindowHeight - 1, ConsoleColor.Black); // clear
-                                ClearLine(Console.WindowHeight - 1);
+									//Draw(inputText, 1, Console.WindowHeight - 1, ConsoleColor.Black); // clear
+									ClearLine(Console.WindowHeight - 1);
+								}
                                 inputText = string.Empty;
                             }
                             else if (inputText.Length < Console.BufferWidth)
@@ -388,7 +391,7 @@ namespace Psybot.UI
         /// <summary> Вывод последних сообщений лога. </summary>
         public static void ReDrawLog()
         {
-            int logLineCount = Console.WindowHeight - 8;
+            int logLineCount = Console.WindowHeight - 6;
             for (int i = 0; i < logLineCount && i < logList.Count; i++)
             {
                 ClearLine(startLogY + i);

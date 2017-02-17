@@ -411,24 +411,16 @@ namespace Psybot
 					Term.Log("DiscordClient is null.", ConsoleColor.Yellow);
 					return;
 				}
+				Term.Log("Disconnect..");
 				await client.Disconnect();
 			}, "Disonnect from server.");
 			// ====================================================================== //
-			//Term.AddCommand(CMD_SEND, async (s) =>
-			//{
-			//    if (client == null)
-			//    {
-			//        Term.Log("DiscordClient is null.", ConsoleColor.Yellow);
-			//        return;
-			//    }
-			//    await client.GetChannel(ID_BOT_CHANNEL)?.SendMessage(s);
-			//}, "Send text to server channel.");
-			// ====================================================================== //
-			Term.AddCommand(CMD_EXIT, (s) =>
+			Term.AddCommand(CMD_EXIT, async (s) =>
 			{
 				if (Connected)
 				{
-					client.Disconnect();
+					Term.Log("Disconnect..");
+					await client.Disconnect();
 				}
 				stop = true;
 			}, "Close this program.");
