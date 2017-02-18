@@ -690,7 +690,7 @@ namespace Psybot.Modules
 
             if (selected)
             {
-                Term.FastDraw("> " + num, 0, y, ConsoleColor.Black, ConsoleColor.White);
+                Term.FastDraw(string.Format("> {0:D3}", num), 0, y, ConsoleColor.Black, ConsoleColor.White);
 
                 if (flag.HasValue)
                     Term.FastDraw($" │ [{(flag.Value ? "x" : " ")}] │ ", ConsoleColor.White, ConsoleColor.Black);
@@ -700,9 +700,9 @@ namespace Psybot.Modules
             else
             {
                 if (flag.HasValue)
-                    Term.FastDraw($"> {num} │ [{(flag.Value ? "x" : " ")}] │ ", 0, y, ConsoleColor.Gray);
+                    Term.FastDraw($"> {num:D3} │ [{(flag.Value ? "x" : " ")}] │ ", 0, y, ConsoleColor.Gray);
                 else
-                    Term.FastDraw($"> {num} │ ", 0, y, ConsoleColor.Gray);
+                    Term.FastDraw($"> {num:D3} │ ", 0, y, ConsoleColor.Gray);
             }
 
             if (title.Length > 48)

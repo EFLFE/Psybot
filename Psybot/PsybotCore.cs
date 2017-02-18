@@ -98,8 +98,8 @@ namespace Psybot
 				else
 				{
 					var msg = new Message(arg.Message.ID, arg.Channel.ID, arg.Channel.Name, arg.Message.CreationDate, arg.Message.Content,
-						arg.Message.Author.Username, arg.Message.Author.Mention, arg.Message.Author.IsBot, arg.Message.Author.AvatarUrl,
-						arg.Message.Pinned, arg.Message.TTS);
+						arg.Message.Author.Username, arg.Message.Author.Mention, arg.Message.Author.ID, arg.Message.Author.IsBot,
+						arg.Message.Author.AvatarUrl, arg.Message.Pinned, arg.Message.TTS);
 
 					moduleManager.ExcecuteModules(msg);
 				}
@@ -115,8 +115,8 @@ namespace Psybot
 				if (userAdmin == null)
 				{
 					// must login
-					if (commands[1] != CMD_ADMIN_ARG1_LOGIN)
-						return;
+					//if (commands[1] != CMD_ADMIN_ARG1_LOGIN)
+					//	return;
 
 					if (userAdmin == null)
 					{
@@ -129,10 +129,11 @@ namespace Psybot
 							}
 						}
 					}
-					if (userAdmin == null)
-						return;
 				}
 				#endregion
+
+				if (userAdmin == null || arg.Message.Author.ID != userAdmin.ID)
+					return;
 
 				switch (commands[1])
 				{

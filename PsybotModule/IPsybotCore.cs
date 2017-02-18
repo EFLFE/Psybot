@@ -35,11 +35,12 @@ namespace PsybotModule
         void SendLog(string mess, ConsoleColor color);
 
 		/// <summary>
-		///     Send file.
+		///     [Obsolete] Send file.
 		/// </summary>
 		/// <param name="channelID"> Channel ID. </param>
 		/// <param name="filePath"> File path. </param>
 		/// <param name="text"> Add text (can be null). </param>
+		[Obsolete("Not ready.")]
 		void SendImage(ulong channelID, string filePath, string text);
     }
 }

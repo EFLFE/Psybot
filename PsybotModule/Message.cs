@@ -1,17 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PsybotModule
 {
+	/// <summary>
+	///		Message data from channel.
+	/// </summary>
 	public struct Message
 	{
 		/// <summary> Message ID. </summary>
 		public ulong MessageId;
 
+		/// <summary> Channel ID. </summary>
 		public ulong ChannelId;
+
+		/// <summary> User ID. </summary>
+		public ulong UserId;
 
 		/// <summary> Channel name. </summary>
 		public string ChannelName;
@@ -23,7 +26,7 @@ namespace PsybotModule
 		public string Content;
 
 		/// <summary> Username. </summary>
-		string UserName;
+		public string UserName;
 
 		/// <summary> User mention. </summary>
 		public string UserMention;
@@ -41,8 +44,9 @@ namespace PsybotModule
 		public bool IsTTS;
 
 		public Message(ulong messageId, ulong channelId, string channelName, DateTimeOffset createdAt, string content, string userName,
-			string userMention, bool isBot, string avatarUrl, bool isPinned, bool isTTS)
+			string userMention, ulong userId, bool isBot, string avatarUrl, bool isPinned, bool isTTS)
 		{
+			UserId = userId;
 			ChannelId = channelId;
 			MessageId = messageId;
 			ChannelName = channelName;
