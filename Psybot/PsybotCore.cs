@@ -29,6 +29,7 @@ namespace Psybot
 		private DiscordClient client;
 		private bool stop;
 		private DiscordUser userAdmin;
+		private ulong userAdminID;
 		private string tempFileAdminID;
 
 		// console commands:
@@ -59,7 +60,7 @@ namespace Psybot
 
 		public PsybotCore()
 		{
-			moduleManager = new ModuleManager(this as IPsybotCore);
+			moduleManager = new ModuleManager(this);
 
 			if (File.Exists(ADMIN_FILE))
 			{
@@ -109,29 +110,33 @@ namespace Psybot
 		private async void excecutePsyCommand(MessageCreateEventArgs arg)
 		{
 			var commands = arg.Message.Content.Split(' ');
-			if (commands.Length > 1 && !string.IsNullOrWhiteSpace(commands[1]))
+
+			#region ADMIN LOGIN
+
+			if (userAdmin == null)
 			{
-				#region ADMIN LOGIN
+				// must login
+				//if (commands[1] != CMD_ADMIN_ARG1_LOGIN)
+				//	return;
+
 				if (userAdmin == null)
 				{
-					// must login
-					//if (commands[1] != CMD_ADMIN_ARG1_LOGIN)
-					//	return;
-
-					if (userAdmin == null)
+					if (tempFileAdminID != null)
 					{
-						if (tempFileAdminID != null)
+						// load from save temp file
+						if (tempFileAdminID.Equals(arg.Message.Author.ID.ToString(), StringComparison.OrdinalIgnoreCase))
 						{
-							// load from save temp file
-							if (tempFileAdminID.Equals(arg.Message.Author.ID.ToString(), StringComparison.OrdinalIgnoreCase))
-							{
-								userAdmin = arg.Message.Author;
-							}
+							userAdmin = arg.Message.Author;
+							userAdminID = arg.Channel.ID; // How to send a message to user?
 						}
 					}
 				}
-				#endregion
+			}
 
+			#endregion
+
+			if (commands.Length > 1 && !string.IsNullOrWhiteSpace(commands[1]))
+			{
 				if (userAdmin == null || arg.Message.Author.ID != userAdmin.ID)
 					return;
 
@@ -341,7 +346,7 @@ namespace Psybot
 			}
 			else
 			{
-				Term.Draw("Disconnected", 7, 0, ConsoleColor.DarkRed);
+				Term.Draw("Disconnected", 7, 0, ConsoleColor.Red);
 			}
 
 			Term.Draw(
@@ -482,7 +487,6 @@ namespace Psybot
 			Term.Log("Bot ready", ConsoleColor.Green);
 		}
 
-		// Discord.Net client log
 		private void DebugLogger_LogMessageReceived(object sender, DebugLogMessageEventArgs e)
 		{
 			var clr = ConsoleColor.Gray;
@@ -505,6 +509,14 @@ namespace Psybot
 			Term.Log($"{e.Level}: {e.Message}", clr);
 		}
 
+		public async void SendAdminMessage(string text)
+		{
+			if (userAdmin != null)
+			{
+				await client.SendMessage(userAdminID, text, false);
+			}
+		}
+
 		#region IPsybotCore METHODS
 
 		/// <summary> Send a message to the server. </summary>
@@ -522,7 +534,6 @@ namespace Psybot
 		public void SendImage(ulong channelID, string filePath, string text)
 		{
 			// TODO: SendImage
-			return;
 		}
 
 		/// <summary>
