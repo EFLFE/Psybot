@@ -31,6 +31,7 @@ namespace Psybot
 		private DiscordUser userAdmin;
 		private ulong userAdminID;
 		private string tempFileAdminID;
+		private bool reconnect; // DSharpPlus reconnect not work?
 
 		// console commands:
 		public const string CMD_CONNECT    = "connect";
@@ -47,7 +48,7 @@ namespace Psybot
 
 		public const string CMD_ADMIN_ARG1_MOD        = "mod";
 		public const string CMD_ADMIN_ARG2_MODINFO    = "info";
-		public const string CMD_ADMIN_ARG2_MODINSTALL = "install";
+		public const string CMD_ADMIN_ARG2_MODINSTALL = "install"; // TODO: fix CMD_ADMIN_ARG2_MODINSTALL
 		public const string CMD_ADMIN_ARG2_MODSEARCH  = "search";
 		public const string CMD_ADMIN_ARG2_MODENABLE  = "enable";
 		public const string CMD_ADMIN_ARG2_MODDISABLE = "disable";
@@ -55,7 +56,7 @@ namespace Psybot
 
 		public const string CMD_ADMIN_ARG1_DISCONNECT = "disconnect";
 
-		// temp login id
+		// temp admin id
 		private const string ADMIN_FILE = "psy-admin.txt";
 
 		public PsybotCore()
@@ -81,8 +82,13 @@ namespace Psybot
 			}
 		}
 
+		// discord message created
 		private void Client_MessageCreated(object sender, MessageCreateEventArgs arg)
 		{
+			// is bot?
+			if (arg.Message.Author.IsBot)
+				return; // ignore
+
 			if (moduleManager.IsCommandContains(arg.Message.Content))
 			{
 				if (arg.Message.Content.StartsWith(CMD_ADMIN, StringComparison.Ordinal))
@@ -128,9 +134,11 @@ namespace Psybot
 						{
 							userAdmin = arg.Message.Author;
 							userAdminID = arg.Channel.ID; // How to send a message to user?
+							SendAdminMessage(":ok_hand:");
 						}
 					}
 				}
+				return;
 			}
 
 			#endregion
@@ -364,7 +372,7 @@ namespace Psybot
 			}
 		}
 
-		// console commands
+		// console commands (and create client)
 		private void addCommands()
 		{
 			Term.AddCommand(CMD_CONNECT, async (s) =>
@@ -390,7 +398,7 @@ namespace Psybot
 							LogLevel = LogLevel.Info,
 #endif
 							UseInternalLogHandler = true,
-							AutoReconnect = true
+							AutoReconnect = false // not work?
 						});
 
 						client.DebugLogger.LogMessageReceived += DebugLogger_LogMessageReceived;
@@ -400,7 +408,6 @@ namespace Psybot
 						client.MessageCreated += Client_MessageCreated;
 					}
 
-					var tocken = File.ReadAllText(TOKEN_FILE);
 					await client.Connect();
 				}
 				catch (Exception ex)
@@ -419,6 +426,8 @@ namespace Psybot
 				}
 				Term.Log("Disconnect..");
 				await client.Disconnect();
+				reconnect = false;
+
 			}, "Disonnect from server.");
 			// ====================================================================== //
 			Term.AddCommand(CMD_EXIT, async (s) =>
@@ -429,6 +438,7 @@ namespace Psybot
 					await client.Disconnect();
 				}
 				stop = true;
+
 			}, "Close this program.");
 			// ====================================================================== //
 			Term.AddCommand(CMD_CLEAR, (s) =>
@@ -451,34 +461,73 @@ namespace Psybot
 				}
 				Console.Clear();
 				Term.ReDrawLog();
+
 			}, "Expadn console window.");
 			// ====================================================================== //
 			Term.AddCommand(CMD_MODULE, (s) =>
 			{
 				moduleManager.EnterGUI();
+
 			}, "Enter modules manager.");
 			// ====================================================================== //
 			Term.AddCommand(CMD_COMMANDS, (s) =>
 			{
 				Term.ShowAllCommands();
+
 			}, "Show all commands.");
 			// ====================================================================== //
 			Term.AddCommand(CMD_SEND, (s) =>
 			{
 				// test
 				SendMessage(82151967899516928UL, s);
-			}, "Send message (test).");
-		}
 
-		private void Client_SocketClosed(object sender, WebSocketSharp.CloseEventArgs e)
-		{
-			connected = false;
-			Term.Log("Socket Closed: " + e.Reason, ConsoleColor.Yellow);
+			}, "Send message (test).");
 		}
 
 		private void Client_SocketOpened(object sender, EventArgs e)
 		{
 			Term.Log("Socket Opened", ConsoleColor.Green);
+			reconnect = true;
+			connected = true;
+		}
+
+		private void Client_SocketClosed(object sender, WebSocketSharp.CloseEventArgs e)
+		{
+			connected = false;
+			if (string.IsNullOrWhiteSpace(e.Reason))
+				Term.Log("Socket Closed", ConsoleColor.Yellow);
+			else
+				Term.Log("Socket Closed: " + e.Reason, ConsoleColor.Yellow);
+
+			if (reconnect)
+			{
+				reconnect = false;
+				ThreadPool.QueueUserWorkItem(reconnect_pool, null);
+			}
+		}
+
+		int reTime = 3999;
+		private void reconnect_pool(object _)
+		{
+			Term.Log("Reconnect...", ConsoleColor.White);
+			Thread.Sleep(1999);
+
+			while (!connected)
+			{
+				try
+				{
+					client.Connect().Wait();
+					//client.Reconnect();
+					return;
+				}
+				catch (Exception ex)
+				{
+					Term.Log("Fail: " + ex.Message, ConsoleColor.Red);
+					Thread.Sleep(reTime);
+					if (reTime < 60000)
+						reTime += 999;
+				}
+			}
 		}
 
 		private void Client_Ready(object sender, EventArgs e)
@@ -524,7 +573,7 @@ namespace Psybot
 		/// <param name="message"> Message. </param>
 		public async void SendMessage(ulong channelID, string message)
 		{
-			if (!Connected)
+			if (!Connected || message.Length == 0)
 				return;
 
 			await client.SendMessage(channelID, message, false);
