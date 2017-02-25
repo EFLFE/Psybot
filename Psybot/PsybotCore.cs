@@ -31,12 +31,12 @@ namespace Psybot
 		private DiscordUser userAdmin;
 		private ulong userAdminID;
 		private string tempFileAdminID;
-		private bool reconnect; // DSharpPlus reconnect not work?
+		private ulong sendHookID;
+		private string gameName, gameUrl;
 
 		// console commands:
 		public const string CMD_CONNECT    = "connect";
 		public const string CMD_DISCONNECT = "disconnect";
-		public const string CMD_SEND       = "send";
 		public const string CMD_EXIT       = "exit";
 		public const string CMD_CLEAR      = "clear";
 		public const string CMD_EXPAND     = "expand";
@@ -44,7 +44,7 @@ namespace Psybot
 		public const string CMD_COMMANDS   = "commands";
 		// admin commands
 		public const string CMD_ADMIN                 = "psy";
-		public const string CMD_ADMIN_ARG1_LOGIN      = "login";
+		public const string CMD_ADMIN_SEND            = "send";
 
 		public const string CMD_ADMIN_ARG1_MOD        = "mod";
 		public const string CMD_ADMIN_ARG2_MODINFO    = "info";
@@ -143,13 +143,31 @@ namespace Psybot
 
 			#endregion
 
+			if (arg.Message.Author.ID != userAdmin.ID)
+				return;
+
 			if (commands.Length > 1 && !string.IsNullOrWhiteSpace(commands[1]))
 			{
-				if (userAdmin == null || arg.Message.Author.ID != userAdmin.ID)
-					return;
 
 				switch (commands[1])
 				{
+				case CMD_ADMIN_SEND:
+					// psy send [[hook ID] [message]]
+					if (commands.Length > 2)
+					{
+						if (commands[2].Equals("hook", StringComparison.OrdinalIgnoreCase) && commands.Length > 3)
+						{
+							sendHookID = ulong.Parse(commands[3]);
+							SendAdminMessage("OK");
+						}
+						else if (sendHookID != 0)
+						{
+							// send
+							SendMessage(sendHookID, arg.Message.Content.Split(new[] { ' ' }, 3)[2]);
+						}
+					}
+					break;
+
 				case CMD_ADMIN_ARG1_MOD:
 
 					if (commands.Length > 2 && !string.IsNullOrWhiteSpace(commands[2]))
@@ -158,7 +176,7 @@ namespace Psybot
 						{
 						case CMD_ADMIN_ARG2_MODINFO:
 
-							await arg.Channel.SendMessage(moduleManager.GetModulesInfo());
+							SendAdminMessage(moduleManager.GetModulesInfo());
 							break;
 						// =================================================================== //
 						case CMD_ADMIN_ARG2_MODINSTALL:
@@ -201,7 +219,7 @@ namespace Psybot
 										}
 										else
 										{
-											await arg.Channel.SendMessage("Error: Bad bumbers format. Sample: 1,2,4");
+											SendAdminMessage("Error: Bad bumbers format. Sample: 1,2,4");
 											return;
 										}
 									}
@@ -220,11 +238,11 @@ namespace Psybot
 										true);
 								}
 
-								await arg.Channel.SendMessage(_log);
+								SendAdminMessage(_log);
 							}
 							else
 							{
-								await arg.Channel.SendMessage("Missing module name arg.");
+								SendAdminMessage("Missing module name arg.");
 							}
 
 							break;
@@ -246,7 +264,7 @@ namespace Psybot
 								}
 							}
 
-							await arg.Channel.SendMessage(sb.ToString());
+							SendAdminMessage(sb.ToString());
 							break;
 						// =================================================================== //
 						case CMD_ADMIN_ARG2_MODENABLE:
@@ -262,12 +280,12 @@ namespace Psybot
 									}
 									goto case CMD_ADMIN_ARG2_MODINFO;
 								}
-								await arg.Channel.SendMessage(
+								SendAdminMessage(
 									moduleManager.EnableModuleByName(commands[3]) ? "Module was enabled." : "Module not found.");
 							}
 							else
 							{
-								await arg.Channel.SendMessage("Missing module name arg.");
+								SendAdminMessage("Missing module name arg.");
 							}
 
 							break;
@@ -285,12 +303,12 @@ namespace Psybot
 									}
 									goto case CMD_ADMIN_ARG2_MODINFO;
 								}
-								await arg.Channel.SendMessage(
+								SendAdminMessage(
 									moduleManager.DisableModuleByName(commands[3]) ? "Module was disabled." : "Module not found.");
 							}
 							else
 							{
-								await arg.Channel.SendMessage("Missing module name arg.");
+								SendAdminMessage("Missing module name arg.");
 							}
 
 							break;
@@ -299,12 +317,12 @@ namespace Psybot
 
 							if (commands.Length > 3)
 							{
-								await arg.Channel.SendMessage(
+								SendAdminMessage(
 									moduleManager.UnloadModule(commands[3], true) ? "Module was removed." : "Module not found.");
 							}
 							else
 							{
-								await arg.Channel.SendMessage("Missing module name arg.");
+								SendAdminMessage("Missing module name arg.");
 							}
 
 							break;
@@ -319,7 +337,7 @@ namespace Psybot
 						sb.AppendLine(CMD_ADMIN_ARG2_MODENABLE + " [module_name/all] - enable module");
 						sb.AppendLine(CMD_ADMIN_ARG2_MODDISABLE + " [module_name/all] - disable module");
 						sb.AppendLine(CMD_ADMIN_ARG2_MODREMOVE + " [module_name] - remove module");
-						await arg.Channel.SendMessage(sb.ToString());
+						SendAdminMessage(sb.ToString());
 					}
 
 					break;
@@ -336,8 +354,9 @@ namespace Psybot
 			{
 				var sb = new StringBuilder("**psy** commands:\n");
 				sb.AppendLine(CMD_ADMIN_ARG1_MOD + " - modules");
+				sb.AppendLine(CMD_ADMIN_SEND + " - Send message (psy send [[hook ID] [message]])");
 				sb.AppendLine(CMD_ADMIN_ARG1_DISCONNECT + " - disconnect bot from server");
-				await arg.Channel.SendMessage(sb.ToString());
+				SendAdminMessage(sb.ToString());
 			}
 		}
 
@@ -398,7 +417,7 @@ namespace Psybot
 							LogLevel = LogLevel.Info,
 #endif
 							UseInternalLogHandler = true,
-							AutoReconnect = false // not work?
+							AutoReconnect = true
 						});
 
 						client.DebugLogger.LogMessageReceived += DebugLogger_LogMessageReceived;
@@ -426,7 +445,6 @@ namespace Psybot
 				}
 				Term.Log("Disconnect..");
 				await client.Disconnect();
-				reconnect = false;
 
 			}, "Disonnect from server.");
 			// ====================================================================== //
@@ -475,19 +493,11 @@ namespace Psybot
 				Term.ShowAllCommands();
 
 			}, "Show all commands.");
-			// ====================================================================== //
-			Term.AddCommand(CMD_SEND, (s) =>
-			{
-				// test
-				SendMessage(82151967899516928UL, s);
-
-			}, "Send message (test).");
 		}
 
 		private void Client_SocketOpened(object sender, EventArgs e)
 		{
 			Term.Log("Socket Opened", ConsoleColor.Green);
-			reconnect = true;
 			connected = true;
 		}
 
@@ -497,37 +507,7 @@ namespace Psybot
 			if (string.IsNullOrWhiteSpace(e.Reason))
 				Term.Log("Socket Closed", ConsoleColor.Yellow);
 			else
-				Term.Log("Socket Closed: " + e.Reason, ConsoleColor.Yellow);
-
-			if (reconnect)
-			{
-				reconnect = false;
-				ThreadPool.QueueUserWorkItem(reconnect_pool, null);
-			}
-		}
-
-		int reTime = 3999;
-		private void reconnect_pool(object _)
-		{
-			Term.Log("Reconnect...", ConsoleColor.White);
-			Thread.Sleep(1999);
-
-			while (!connected)
-			{
-				try
-				{
-					client.Connect().Wait();
-					//client.Reconnect();
-					return;
-				}
-				catch (Exception ex)
-				{
-					Term.Log("Fail: " + ex.Message, ConsoleColor.Red);
-					Thread.Sleep(reTime);
-					if (reTime < 60000)
-						reTime += 999;
-				}
-			}
+				Term.Log("Socket Closed. Reason: " + e.Reason, ConsoleColor.Yellow);
 		}
 
 		private void Client_Ready(object sender, EventArgs e)
@@ -594,6 +574,25 @@ namespace Psybot
 		{
 			// todo: auto detect owner module name
 			Term.Log("$ " + mess, color);
+		}
+
+		/// <summary> Updates current bot status. </summary>
+		/// <param name="game"> Game name. </param>
+		/// <param name="idle_since"></param>
+		/// <param name="url"> Game url (optional, for 'psy game' command). </param>
+		public void UpdateStatus(string game = "", int idle_since = -1, string url = null)
+		{
+			if (string.IsNullOrWhiteSpace(game))
+			{
+				gameName = null;
+				gameUrl = null;
+			}
+			else
+			{
+				gameName = game;
+				gameUrl = url;
+			}
+			client.UpdateStatus(game, idle_since);
 		}
 
 		#endregion

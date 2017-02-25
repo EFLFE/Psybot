@@ -42,5 +42,15 @@ namespace PsybotModule
 		/// <param name="text"> Add text (can be null). </param>
 		[Obsolete("Not ready.")]
 		void SendImage(ulong channelID, string filePath, string text);
-    }
+
+		// TODO: UpdateStatus access
+		/// <summary>
+		///		Updates current bot status.
+		/// </summary>
+		/// <param name="game"> Game name. </param>
+		/// <param name="idle_since"></param>
+		/// <param name="url"> Game url (optional, for 'psy game' command). </param>
+		void UpdateStatus(string game = "", int idle_since = -1, string url = null);
+
+	}
 }
