@@ -33,6 +33,7 @@ namespace Psybot
 		private string tempFileAdminID;
 		private ulong sendHookID;
 		private string gameName, gameUrl;
+		private string editMessage;
 
 		// console commands:
 		public const string CMD_CONNECT    = "connect";
@@ -45,6 +46,7 @@ namespace Psybot
 		// admin commands
 		public const string CMD_ADMIN                 = "psy";
 		public const string CMD_ADMIN_SEND            = "send";
+		public const string CMD_ADMIN_GAME            = "game";
 
 		public const string CMD_ADMIN_ARG1_MOD        = "mod";
 		public const string CMD_ADMIN_ARG2_MODINFO    = "info";
@@ -109,6 +111,11 @@ namespace Psybot
 						arg.Message.Author.AvatarUrl, arg.Message.Pinned, arg.Message.TTS);
 
 					moduleManager.ExcecuteModules(msg);
+					if(editMessage != null)
+					{
+						arg.Message.Edit(editMessage).Wait();
+						editMessage = null;
+					}
 				}
 			}
 		}
@@ -143,15 +150,15 @@ namespace Psybot
 
 			#endregion
 
-			if (arg.Message.Author.ID != userAdmin.ID)
-				return;
-
 			if (commands.Length > 1 && !string.IsNullOrWhiteSpace(commands[1]))
 			{
-
 				switch (commands[1])
 				{
 				case CMD_ADMIN_SEND:
+
+					if (arg.Message.Author.ID != userAdmin.ID)
+						return;
+
 					// psy send [[hook ID] [message]]
 					if (commands.Length > 2)
 					{
@@ -168,7 +175,23 @@ namespace Psybot
 					}
 					break;
 
+				case CMD_ADMIN_GAME:
+
+					if (string.IsNullOrWhiteSpace(gameUrl))
+					{
+						await client.SendMessage(arg.Channel.ID, @"I dont know. ¯\_(ツ)_/¯");
+					}
+					else
+					{
+						await client.SendMessage(arg.Channel.ID, $"Game: {gameName}\n{gameUrl}");
+					}
+
+					break;
+
 				case CMD_ADMIN_ARG1_MOD:
+
+					if (arg.Message.Author.ID != userAdmin.ID)
+						return;
 
 					if (commands.Length > 2 && !string.IsNullOrWhiteSpace(commands[2]))
 					{
@@ -343,6 +366,9 @@ namespace Psybot
 					break;
 
 				case CMD_ADMIN_ARG1_DISCONNECT:
+
+					if (arg.Message.Author.ID != userAdmin.ID)
+						return;
 
 					Term.Log("Disconnect from channel.", ConsoleColor.White);
 					await client.Disconnect();
@@ -593,6 +619,11 @@ namespace Psybot
 				gameUrl = url;
 			}
 			client.UpdateStatus(game, idle_since);
+		}
+
+		public void EditMessage(string newMesssage)
+		{
+			editMessage = newMesssage;
 		}
 
 		#endregion

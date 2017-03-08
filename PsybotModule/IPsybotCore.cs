@@ -52,5 +52,11 @@ namespace PsybotModule
 		/// <param name="url"> Game url (optional, for 'psy game' command). </param>
 		void UpdateStatus(string game = "", int idle_since = -1, string url = null);
 
+		/// <summary>
+		///		Edit message.
+		/// </summary>
+		/// <param name="newMesssage"> New message. </param>
+		void EditMessage(string newMesssage);
+
 	}
 }
