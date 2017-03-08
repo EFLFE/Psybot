@@ -14,11 +14,13 @@ namespace PlayGame
 		private static HtmlWeb htmlWeb;
 		private static Random rnd;
 
-		public string RunCommandName { get; set; }
+		public string[] RunCommandsName { get; set; }
 
 		public ParameterTypeEnum ParameterType { get; set; }
 
 		public StringComparison CommandComparison { get; set; }
+
+		public bool CheckAllMessage { get; set; }
 
 		private static IPsybotCore core;
 		private static bool enabled;
@@ -27,7 +29,6 @@ namespace PlayGame
 		public void Load(IPsybotCore _core)
 		{
 			core = _core;
-			RunCommandName = "--null";
 			ParameterType = ParameterTypeEnum.Unparsed;
 			CommandComparison = StringComparison.OrdinalIgnoreCase;
 			rnd = new Random();

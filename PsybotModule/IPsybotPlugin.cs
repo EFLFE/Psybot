@@ -9,9 +9,9 @@ namespace PsybotModule
     public interface IPsybotModule
     {
         /// <summary>
-        ///     Command name for run Excecute method.
+        ///     Commands name for run Excecute method (no more 16).
         /// </summary>
-        string RunCommandName { get; set; }
+        string[] RunCommandsName { get; set; }
 
         /// <summary>
         ///     Command name comparison.
@@ -22,6 +22,11 @@ namespace PsybotModule
         ///     Parse type for command (todo).
         /// </summary>
         ParameterTypeEnum ParameterType { get; set; }
+
+		/// <summary>
+		///		(Test) If true - ignore RunCommandName.
+		/// </summary>
+		bool CheckAllMessage { get; set; }
 
         /// <summary>
         ///     On enable modele.

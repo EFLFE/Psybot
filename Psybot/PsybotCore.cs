@@ -44,9 +44,9 @@ namespace Psybot
 		public const string CMD_MODULE     = "modules";
 		public const string CMD_COMMANDS   = "commands";
 		// admin commands
-		public const string CMD_ADMIN                 = "psy";
-		public const string CMD_ADMIN_SEND            = "send";
-		public const string CMD_ADMIN_GAME            = "game";
+		public const string CMD_ADMIN      = "psy";
+		public const string CMD_ADMIN_SEND = "send";
+		public const string CMD_ADMIN_GAME = "game";
 
 		public const string CMD_ADMIN_ARG1_MOD        = "mod";
 		public const string CMD_ADMIN_ARG2_MODINFO    = "info";

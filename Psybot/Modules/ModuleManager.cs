@@ -12,6 +12,7 @@ namespace Psybot.Modules
 {
 	internal sealed class ModuleManager
 	{
+		public const int MAX_COMMANDS_COUNT = 16;
 		public const string DEFAULT_MODULE_PATH = "Modules";
 
 		public const string INI_CONFIG_FILE_NAME     = "config.ini";
@@ -35,7 +36,7 @@ namespace Psybot.Modules
 		private int enabledModules;
 
 		// RunCommandName array from all modulef for fast parse
-		private List<string> runCommandsList;
+		private List<string[]> runCommandsList;
 
 		public int GetInstalledModulesCount => modulesListData.Count;
 
@@ -49,7 +50,7 @@ namespace Psybot.Modules
 			iniReader = new IniReader(INI_CONFIG_FILE_NAME);
 			modulesListData = new List<ModuleData>();
 			modulesDictData = new Dictionary<string, int>();
-			runCommandsList = new List<string>() { PsybotCore.CMD_ADMIN };
+			runCommandsList = new List<string[]>();
 
 			if (!Directory.Exists(DEFAULT_MODULE_PATH))
 			{
@@ -116,7 +117,7 @@ namespace Psybot.Modules
 				{
 					if (remove)
 					{
-						runCommandsList.Remove(modulesListData[index].Module.RunCommandName);
+						runCommandsList.Remove(modulesListData[index].Module.RunCommandsName);
 						modulesListData.RemoveAt(index);
 						// recheck index
 						modulesDictData.Clear();
@@ -138,9 +139,12 @@ namespace Psybot.Modules
 			{
 				for (int i = runCommandsList.Count - 1; i >= 0; i--)
 				{
-					if (messageRawText.StartsWith(runCommandsList[i], StringComparison.OrdinalIgnoreCase))
+					for (int j = 0; j < runCommandsList[i].Length && j < MAX_COMMANDS_COUNT; j++)
 					{
-						return true;
+						if (messageRawText.StartsWith(runCommandsList[i][j], StringComparison.OrdinalIgnoreCase))
+						{
+							return true;
+						}
 					}
 				}
 			}
@@ -157,27 +161,31 @@ namespace Psybot.Modules
 				if (modulesListData[i].Status == ModuleData.StatusEnum.Enable)
 				{
 					// check command
-					string cmd = modulesListData[i].Module.RunCommandName;
-
-					if (args.Content.StartsWith(cmd, modulesListData[i].Module.CommandComparison))
+					for (int j = 0; j < modulesListData[i].Module.RunCommandsName.Length && j < MAX_COMMANDS_COUNT; j++)
 					{
-						try
-						{
-							args.Content = args.Content.Remove(0, modulesListData[i].Module.RunCommandName.Length).Trim(); // rm command
+						string cmd = modulesListData[i].Module.RunCommandsName[j];
 
-							await modulesListData[i].Module.Excecute(args);
-						}
-						catch (Exception ex)
+						if (args.Content.StartsWith(cmd, modulesListData[i].Module.CommandComparison))
 						{
-							enabledModules--;
-							modulesListData[i].Status = ModuleData.StatusEnum.Crash;
-							modulesListData[i].CrashException = ex;
+							try
+							{
+								args.Content = args.Content.Remove(0, modulesListData[i].Module.RunCommandsName[j].Length).Trim(); // rm command
 
-							Term.Log("Module crash: " + modulesListData[i].FileName, ConsoleColor.Red);
-							Term.Log(ex.Message, ConsoleColor.Red);
-							core.SendAdminMessage("Module crash: " + modulesListData[i].FileName + "\n" + ex.Message);
+								await modulesListData[i].Module.Excecute(args);
+							}
+							catch (Exception ex)
+							{
+								enabledModules--;
+								modulesListData[i].Status = ModuleData.StatusEnum.Crash;
+								modulesListData[i].CrashException = ex;
+
+								Term.Log("Module crash: " + modulesListData[i].FileName, ConsoleColor.Red);
+								Term.Log(ex.Message, ConsoleColor.Red);
+								core.SendAdminMessage("Module crash: " + modulesListData[i].FileName + "\n" + ex.Message);
+							}
 						}
 					}
+
 				}
 			}
 		}
@@ -627,42 +635,43 @@ namespace Psybot.Modules
 					}
 
 					Term.FastDraw("Create instance\n", ConsoleColor.Gray);
-					IPsybotModule moduel = Activator.CreateInstance(types[typeIndex]) as IPsybotModule;
+					IPsybotModule mod = Activator.CreateInstance(types[typeIndex]) as IPsybotModule;
 
 					// loading
 					Term.FastDraw("Loading\n", ConsoleColor.Gray);
-					moduel.Load(core);
+					mod.Load(core);
 
 					// check
-					if (string.IsNullOrWhiteSpace(moduel.RunCommandName))
+					if (mod.CheckAllMessage)
 					{
-						errors++;
-						var errorText = "Error: 'RunCommandName' is not set.\n";
-						sb?.Append(":warning: " + errorText);
-						Term.FastDraw(errorText, ConsoleColor.Red);
-						continue;
+						Term.FastDraw("Warning! This module requires the access to check all messages.", ConsoleColor.Yellow);
 					}
-					if (moduel.RunCommandName.Length > 18)
+					else
 					{
-						errors++;
-						var errorText = "Error: 'RunCommandName' text size should not be more than 18.\n";
-						sb?.Append(":warning: " + errorText);
-						Term.FastDraw(errorText, ConsoleColor.Red);
-						continue;
-					}
-					if (moduel.RunCommandName.StartsWith(PsybotCore.CMD_ADMIN, StringComparison.Ordinal))
-					{
-						errors++;
-						var errorText = "Error: 'RunCommandName' can not start with '" + PsybotCore.CMD_ADMIN + "'.\n";
-						sb?.Append(":warning: " + errorText);
-						Term.FastDraw(errorText, ConsoleColor.Red);
-						continue;
+						if (mod.RunCommandsName == null
+							|| mod.RunCommandsName.Length == 0
+							|| string.IsNullOrWhiteSpace(mod.RunCommandsName[0]))
+						{
+							errors++;
+							var errorText = "Error: 'RunCommandName' is not set.\n";
+							sb?.Append(":warning: " + errorText);
+							Term.FastDraw(errorText, ConsoleColor.Red);
+							continue;
+						}
+						else if (mod.RunCommandsName[0].StartsWith(PsybotCore.CMD_ADMIN, StringComparison.Ordinal))
+						{
+							errors++;
+							var errorText = "Error: 'RunCommandName' can not start with '" + PsybotCore.CMD_ADMIN + "'.\n";
+							sb?.Append(":warning: " + errorText);
+							Term.FastDraw(errorText, ConsoleColor.Red);
+							continue;
+						}
 					}
 
 					// add to dict
-					modulesListData.Add(new ModuleData(path[i], moduel));
+					modulesListData.Add(new ModuleData(path[i], mod));
 					modulesDictData.Add(modFileName, modulesListData.Count - 1);
-					runCommandsList.Add(modulesListData[modulesListData.Count - 1].Module.RunCommandName);
+					runCommandsList.Add(modulesListData[modulesListData.Count - 1].Module.RunCommandsName);
 
 					// success
 					loaded++;
