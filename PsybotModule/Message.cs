@@ -43,8 +43,14 @@ namespace PsybotModule
 		/// <summary> Is TTS. </summary>
 		public bool IsTTS;
 
+		/// <summary> Is commands message. </summary>
+		public bool IsCommandsMessage;
+
+		/// <summary> Commands message (if IsCommandsMessage == true). </summary>
+		public string CommandsMessage;
+
 		public Message(ulong messageId, ulong channelId, string channelName, DateTimeOffset createdAt, string content, string userName,
-			string userMention, ulong userId, bool isBot, string avatarUrl, bool isPinned, bool isTTS)
+			string userMention, ulong userId, bool isBot, string avatarUrl, bool isPinned, bool isTTS, bool isCommandsMessage, string commandsMessage)
 		{
 			UserId = userId;
 			ChannelId = channelId;
@@ -58,6 +64,8 @@ namespace PsybotModule
 			AvatarUrl = avatarUrl;
 			IsPinned = isPinned;
 			IsTTS = isTTS;
+			IsCommandsMessage = isCommandsMessage;
+			CommandsMessage = commandsMessage;
 		}
 	}
 }

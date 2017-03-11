@@ -51,6 +51,7 @@ namespace Psybot.Modules
 			modulesListData = new List<ModuleData>();
 			modulesDictData = new Dictionary<string, int>();
 			runCommandsList = new List<string[]>();
+			runCommandsList.Add(new[] { PsybotCore.CMD_ADMIN });
 
 			if (!Directory.Exists(DEFAULT_MODULE_PATH))
 			{
@@ -161,6 +162,7 @@ namespace Psybot.Modules
 				if (modulesListData[i].Status == ModuleData.StatusEnum.Enable)
 				{
 					// check command
+					bool wasNeed = false;
 					for (int j = 0; j < modulesListData[i].Module.RunCommandsName.Length && j < MAX_COMMANDS_COUNT; j++)
 					{
 						string cmd = modulesListData[i].Module.RunCommandsName[j];
@@ -169,6 +171,10 @@ namespace Psybot.Modules
 						{
 							try
 							{
+								// send to module
+								wasNeed = true;
+								args.IsCommandsMessage = true;
+								args.CommandsMessage = modulesListData[i].Module.RunCommandsName[j];
 								args.Content = args.Content.Remove(0, modulesListData[i].Module.RunCommandsName[j].Length).Trim(); // rm command
 
 								await modulesListData[i].Module.Excecute(args);
@@ -185,7 +191,12 @@ namespace Psybot.Modules
 							}
 						}
 					}
-
+					// else
+					if (!wasNeed && modulesListData[i].Module.CheckAllMessage)
+					{
+						await modulesListData[i].Module.Excecute(args);
+						continue;
+					}
 				}
 			}
 		}

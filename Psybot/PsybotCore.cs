@@ -89,9 +89,9 @@ namespace Psybot
 		{
 			// is bot?
 			if (arg.Message.Author.IsBot)
-				return; // ignore
+				return; // ignore bot
 
-			if (moduleManager.IsCommandContains(arg.Message.Content))
+			//if (moduleManager.IsCommandContains(arg.Message.Content)) CheckAllMessage overlayer
 			{
 				if (arg.Message.Content.StartsWith(CMD_ADMIN, StringComparison.Ordinal))
 				{
@@ -108,7 +108,7 @@ namespace Psybot
 				{
 					var msg = new Message(arg.Message.ID, arg.Channel.ID, arg.Channel.Name, arg.Message.CreationDate, arg.Message.Content,
 						arg.Message.Author.Username, arg.Message.Author.Mention, arg.Message.Author.ID, arg.Message.Author.IsBot,
-						arg.Message.Author.AvatarUrl, arg.Message.Pinned, arg.Message.TTS);
+						arg.Message.Author.AvatarUrl, arg.Message.Pinned, arg.Message.TTS, false, null);
 
 					moduleManager.ExcecuteModules(msg);
 					if(editMessage != null)
