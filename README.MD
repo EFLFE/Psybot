@@ -1,4 +1,19 @@
 ﻿![psybot icon](art/psybot_logo.png)
+ 
+## Warning!
+
+Psybot version 0.2 now is archived.
+
+Important about the modules:
+You cannot unload an assembly after loading (`Assembly.Load`).
+The solution to load assemblies in a separate Domain also does not work,
+Because .NET CORE does not support `AppDomain.CreateDomain`.
+
+Out of the situation: You can only dynamically load assemblies.
+To unload/Restart the module-you need to restart the program itself.
+Alas, otherwise neither.
+
+This issue will be resolved in the third version of the project.
 
 ## Release info
 
